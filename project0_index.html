@@ -1,16 +1,269 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My Portfolio</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My CS180 Portfolio</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 50px 40px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .subtitle {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .project-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .project-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .project-number {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        
+        .project-title {
+            color: #333;
+            font-size: 1.8em;
+        }
+        
+        .part {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            border-left: 3px solid #764ba2;
+        }
+        
+        .part h3 {
+            color: #667eea;
+            margin-bottom: 12px;
+            font-size: 1.3em;
+        }
+        
+        .part p {
+            color: #555;
+            line-height: 1.7;
+        }
+        
+        .part ul {
+            margin-top: 10px;
+            padding-left: 20px;
+        }
+        
+        .part li {
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        /* Side-by-side comparison block */
+        .comparison {
+            display: flex;
+            gap: 16px;
+            margin-top: 12px;
+        }
+        .comparison .col {
+            flex: 1;
+            background: #f9f9ff;
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .comparison img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+        .label {
+            display: inline-block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 14px 35px;
+            border-radius: 25px;
+            text-decoration: none;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 1.1em;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        footer {
+            background: #f8f9fa;
+            text-align: center;
+            padding: 25px;
+            color: #666;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .tag {
+            display: inline-block;
+            background: #e3e7ff;
+            color: #667eea;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            margin-right: 10px;
+            margin-top: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .project-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .project-number {
+                margin-bottom: 10px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Welcome to My CS180 Portfolio!</h1>
-    <a href="./1/index.html">Project 1</a>
+    <div class="container">
+        <header>
+            <h1>Welcome to My CS180 Portfolio!</h1>
+            <p class="subtitle">Computer Vision & Computational Photography</p>
+        </header>
+        
+        <div class="content">
+            <div class="project-card">
+                <div class="project-header">
+                    <span class="project-number">PROJECT 0</span>
+                    <h2 class="project-title">Photography Fundamentals</h2>
+                </div>
+                
+                <div class="part">
+                    <h3>Part 1: Selfie - The Wrong Way vs. The Right Way</h3>
+                    <p>
+                        This part explores the fundamental differences between amateur and professional selfie techniques. 
+                        We examine common mistakes people make when taking selfies and contrast them with proper photographic techniques.
+                    </p>
+                    <div class="comparison">
+                        <div class="col">
+                            <span class="label">Right Way</span>
+                            <img src="photo/IMG_3487.heic" alt="Right way selfie" />
+                        </div>
+                        <div class="col">
+                            <span class="label">Wrong Way</span>
+                            <img src="photo/IMG_3489.heic" alt="Wrong way selfie" />
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="part">
+                    <h3>Part 2: Architectural Perspective Compression</h3>
+                    <p>
+                        This section demonstrates how different focal lengths and camera distances affect the perception of architectural subjects. 
+                        We explore how perspective compression can dramatically change the appearance of buildings and spaces, 
+                        creating different visual narratives from the same subject.
+                    </p>
+                    <div class="comparison">
+                        <div class="col">
+                            <span class="label">Farther</span>
+                            <img src="photo/20250902_170909.jpg" alt="Architecture farther distance" />
+                        </div>
+                        <div class="col">
+                            <span class="label">Closer</span>
+                            <img src="photo/20250902_170925.jpg" alt="Architecture closer distance" />
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="part">
+                    <h3>Part 3: The Dolly Zoom</h3>
+                    <p>
+                        This video duplicates the famous dolly zoom film effect, also known as the "Vertigo effect" after Hitchcock's film. 
+                        The technique involves simultaneously moving the camera backward while zooming in (or vice versa), 
+                    
+                    </p>
+                    <img 
+                        src="photo/ezgif.com-animated-gif-maker.gif" 
+                        alt="Dolly zoom animation"
+                        style="max-width: 100%; height: auto; display: block; margin: 10px auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);"
+                    />
+                </div>
+                
+                <div style="text-align: center;">
+                    <a href="./1/index.html" class="btn">View Full Project →</a>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p><strong>CS180: Computer Vision and Computational Photography</strong></p>
+            <p>UC Berkeley • Fall 2025</p>
+        </footer>
+    </div>
 </body>
 </html>
