@@ -2,20 +2,67 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Redirecting…</title>
-  <meta http-equiv="refresh" content="0; url=project0_index.html" />
-  <link rel="canonical" href="project0_index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CS180 Fall 2025 — Projects (Fangzhou)</title>
   <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; padding: 40px; }
-    a { color: #667eea; }
+    :root {
+      --fg: #0f172a;
+      --muted: #475569;
+      --link: #2563eb;
+      --bg: #ffffff;
+      --card: #f8fafc;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; color: var(--fg); background: var(--bg); }
+    header { padding: 32px 20px; background: linear-gradient(180deg, #eef2ff, #ffffff); border-bottom: 1px solid var(--border); }
+    .container { max-width: 900px; margin: 0 auto; padding: 0 20px; }
+    h1 { margin: 0 0 8px; font-size: 28px; }
+    h2 { margin: 24px 0 8px; font-size: 20px; }
+    p { color: var(--muted); line-height: 1.6; }
+    a { color: var(--link); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 20px; }
+    .card { border: 1px solid var(--border); background: var(--card); border-radius: 12px; padding: 16px; }
+    .card h3 { margin: 0 0 8px; font-size: 18px; }
+    .meta { font-size: 14px; color: var(--muted); margin-top: 4px; }
+    footer { padding: 24px 20px; border-top: 1px solid var(--border); color: var(--muted); font-size: 14px; }
   </style>
-  <script>
-    // Safety redirect for environments that support JS
-    window.location.replace('project0_index.html');
-  </script>
+  <meta name="description" content="CS180 Fall 2025 Projects by Fangzhou" />
+  <meta name="robots" content="noindex" />
+  <link rel="icon" href="data:," />
   </head>
 <body>
-  <p>Redirecting to <a href="project0_index.html">project0_index.html</a>…</p>
+  <header>
+    <div class="container">
+      <h1>CS180 Fall 2025 — Projects</h1>
+      <p>Fangzhou’s project index. See Project 1 below for the Background and writeup page.</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <section>
+      <h2>Project 1 — Prokudin‑Gorskii Colorizing</h2>
+      <p>
+        Reconstruct color photos from Prokudin‑Gorskii’s glass plate negatives by aligning the
+        three filtered exposures (B, G, R). Start with small images, then scale up with an
+        image pyramid for the large .tif files.
+      </p>
+      <div class="grid">
+        <div class="card">
+          <h3><a href="cs180%20proj1%20data/proj1.html">Background & Writeup</a></h3>
+          <p class="meta">Assignment details, approach, results, and offsets.</p>
+        </div>
+        <div class="card">
+          <h3><a href="project0_index.html">Project 0 — Gallery</a></h3>
+          <p class="meta">Previous project page (existing).</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">© Fangzhou — CS180 (for course submission/testing)</div>
+  </footer>
 </body>
 </html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CS180 Project 1 — Prokudin‑Gorskii Colorizing</title>
+  <style>
+    :root { --fg:#0f172a; --muted:#475569; --link:#2563eb; --bg:#ffffff; --border:#e2e8f0; --card:#f8fafc; }
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; color: var(--fg); background: var(--bg); }
+    header { padding: 28px 20px; background: linear-gradient(180deg, #eef2ff, #ffffff); border-bottom: 1px solid var(--border); }
+    .container { max-width: 980px; margin: 0 auto; padding: 0 20px; }
+    h1 { margin: 0 0 8px; font-size: 28px; }
+    h2 { margin: 28px 0 8px; font-size: 22px; }
+    h3 { margin: 20px 0 8px; font-size: 18px; }
+    p, li { color: var(--muted); line-height: 1.65; }
+    a { color: var(--link); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav.breadcrumb { font-size: 14px; margin-top: 6px; }
+    .toc { background: var(--card); border:1px solid var(--border); border-radius: 10px; padding: 12px 16px; }
+    .toc ul { margin: 8px 0 0 16px; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: #0b1220; color: #e2e8f0; padding: 10px 12px; border-radius: 8px; overflow:auto; font-size: 13px; }
+    .callout { border-left: 4px solid #818cf8; background: #f5f7ff; padding: 10px 12px; border-radius: 6px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+    figure { margin: 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: #fff; }
+    figure img { display:block; width:100%; height:auto; }
+    figure figcaption { font-size: 13px; color: var(--muted); padding: 8px 10px; border-top: 1px solid var(--border); }
+    footer { padding: 28px 20px; border-top: 1px solid var(--border); color: var(--muted); font-size: 14px; margin-top: 36px; }
+    .offsets td, .offsets th { padding: 6px 10px; border-bottom: 1px solid var(--border); text-align: left; font-size: 14px; }
+    .offsets { border-collapse: collapse; width: 100%; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>CS180 Project 1 — Prokudin‑Gorskii Colorizing</h1>
+      <nav class="breadcrumb"><a href="../index.html">← Back to Projects</a></nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="toc">
+      <strong>Contents:</strong>
+      <ul>
+        <li><a href="#background">Background</a></li>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#details">Details</a></li>
+        <li><a href="#bells">Bells & Whistles</a></li>
+        <li><a href="#deliverables">Deliverables</a></li>
+        <li><a href="#advice">Final Advice</a></li>
+        <li><a href="#results">Results & Offsets</a></li>
+      </ul>
+    </section>
+
+    <section id="background">
+      <h2>Background</h2>
+      <p>
+        Sergei Mikhailovich Prokudin‑Gorskii (1863–1944) traveled across the Russian Empire
+        capturing thousands of scenes using three sequential exposures through <em>blue</em>,
+        <em>green</em>, and <em>red</em> filters on a single glass plate. Though color printing
+        wasn’t yet practical, his RGB negatives survived and were later digitized by the Library
+        of Congress. By aligning the three filtered images, we can reconstruct convincing color
+        photographs from the early 20th century.
+      </p>
+    </section>
+
+    <section id="overview">
+      <h2>Overview</h2>
+      <p>
+        Goal: extract the three channel images from a digitized glass plate, align G and R to B,
+        and stack them into a color image with minimal artifacts. Start with small images
+        (e.g., <code>monastery.jpg</code>, <code>cathedral.jpg</code>), then handle large
+        <code>.tif</code> files using a coarse‑to‑fine image pyramid.
+      </p>
+    </section>
+
+    <section id="details">
+      <h2>Details</h2>
+      <ul>
+        <li>Glass plates contain B, G, R in that vertical order (top → bottom).</li>
+        <li>Align via windowed search (e.g., displacements in [−15, 15]) using metrics such as L2 or NCC.</li>
+        <li>For large displacements, use a pyramid: estimate on a coarse scale, refine at finer scales.</li>
+        <li>Work on internal pixels to reduce border effects; convert to float.</li>
+        <li>Vectorize where possible; aim for &lt; 1 minute per image.</li>
+      </ul>
+      <div class="callout">
+        <strong>Note:</strong> For images like the Emir of Bukhara, raw intensity may differ across channels.
+        Consider edges/gradients or normalized metrics.
+      </div>
+      <h3>Skeleton & Data</h3>
+      <p>Data and starter code live in this folder. Example small images:</p>
+      <ul>
+        <li><code>monastery.jpg</code></li>
+        <li><code>cathedral.jpg</code></li>
+        <li><code>tobolsk.jpg</code></li>
+      </ul>
+    </section>
+
+    <section id="bells">
+      <h2>Bells & Whistles</h2>
+      <ul>
+        <li>Automatic cropping (detect and remove borders).</li>
+        <li>Automatic contrast stretching.</li>
+        <li>Automatic white balance (estimate illuminant; shift toward neutral).</li>
+        <li>Better color mapping between B/G/R filters and RGB output.</li>
+        <li>Edge/gradient‑based alignment features.</li>
+        <li>Search small rotations/scales in addition to translations.</li>
+      </ul>
+    </section>
+
+    <section id="deliverables">
+      <h2>Deliverables</h2>
+      <ul>
+        <li>Short writeup of approach and decisions.</li>
+        <li>Results on all provided examples with displacement vectors.</li>
+        <li>Results on a few images from the LoC collection.</li>
+        <li>Failures (if any) with a brief explanation.</li>
+        <li>Bells & whistles: describe and show before/after where applicable.</li>
+      </ul>
+    </section>
+
+    <section id="advice">
+      <h2>Final Advice</h2>
+      <ul>
+        <li>Write reusable pyramid code (useful again in Project 2).</li>
+        <li>Avoid high‑level auto‑alignment or pyramid builders; implement the logic yourself.</li>
+        <li>Use fixed parameters for final outputs; a few failures are acceptable.</li>
+        <li>Convert to float; consider <code>np.roll</code> for shifts.</li>
+      </ul>
+    </section>
+
+    <section id="results">
+      <h2>Results & Offsets</h2>
+      <p>
+        First, single‑scale alignment using L2 (Euclidean distance) on the three small images
+        you listed. Offsets are printed as <code>(x, y)</code> where <code>x</code> is row shift
+        and <code>y</code> is column shift, matching your notebook prints.
+      </p>
+      <table class="offsets">
+        <thead><tr><th>Image</th><th>G offset (x, y)</th><th>R offset (x, y)</th></tr></thead>
+        <tbody>
+          <tr><td>monastery.jpg</td><td>(-3, 2)</td><td>(3, 2)</td></tr>
+          <tr><td>tobolsk.jpg</td><td>(3, 3)</td><td>(6, 3)</td></tr>
+          <tr><td>cathedral.jpg</td><td>(5, 2)</td><td>(12, 3)</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Single‑Scale (L2) — Thumbnails</h3>
+      <div class="grid">
+        <figure>
+          <img src="output/single_scale_aligned_euclidean_distance_monastery.jpg" alt="Monastery (single-scale L2)" />
+          <figcaption>Monastery — Green offset: (-3, 2) · Red offset: (3, 2)</figcaption>
+        </figure>
+        <figure>
+          <img src="output/single_scale_aligned_euclidean_distance_tobolsk.jpg" alt="Tobolsk (single-scale L2)" />
+          <figcaption>Tobolsk — Green offset: (3, 3) · Red offset: (6, 3)</figcaption>
+        </figure>
+        <figure>
+          <img src="output/single_scale_aligned_euclidean_distance_cathedral.jpg" alt="Cathedral (single-scale L2)" />
+          <figcaption>Cathedral — Green offset: (5, 2) · Red offset: (12, 3)</figcaption>
+        </figure>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">© Fangzhou — CS180 Project 1</div>
+  </footer>
+</body>
+</html>
