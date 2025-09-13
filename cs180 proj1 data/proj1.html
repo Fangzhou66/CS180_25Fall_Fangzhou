@@ -42,162 +42,43 @@
     <section class="toc">
       <strong>Contents:</strong>
       <ul>
-        <li><a href="#background">Background</a></li>
-        <li><a href="#overview">Overview</a></li>
-        <li><a href="#details">Details</a></li>
-        <li><a href="#bells">Bells & Whistles</a></li>
-        <li><a href="#deliverables">Deliverables</a></li>
-        <li><a href="#advice">Final Advice</a></li>
+        <li><a href="#overview">Project Overview</a></li>
+        <li><a href="#part1">Part 1: Single‑Scale Alignment</a></li>
         <li><a href="#results">Results & Offsets</a></li>
+        <li><a href="#part2">Part 2: Multi‑Scale Pyramid Alignment</a></li>
       </ul>
-    </section>
-
-    <section id="large-images">
-      <h2>Large Images</h2>
-      <p>Coarse‑to‑fine pyramid + NCC (+ Sobel edges) results on the large .tif images.</p>
-
-      <table class="offsets">
-        <thead><tr><th>Image</th><th>G offset (x, y)</th><th>R offset (x, y)</th></tr></thead>
-        <tbody>
-          <tr><td>Italil</td><td>(38, 21)</td><td>(76, 35)</td></tr>
-          <tr><td>Church</td><td>(25, 4)</td><td>(58, -4)</td></tr>
-          <tr><td>Three Generations</td><td>(53, 14)</td><td>(112, 11)</td></tr>
-          <tr><td>Lugano</td><td>(41, -16)</td><td>(93, -29)</td></tr>
-          <tr><td>Melons</td><td>(82, 11)</td><td>(178, 13)</td></tr>
-          <tr><td>Lastochikino</td><td>(-3, -2)</td><td>(75, -9)</td></tr>
-          <tr><td>Icon</td><td>(41, 17)</td><td>(89, 23)</td></tr>
-          <tr><td>Emir</td><td>(49, 24)</td><td>(155, -1047)</td></tr>
-          <tr><td>Siren</td><td>(49, -6)</td><td>(96, -25)</td></tr>
-          <tr><td>Self Portrait</td><td>(79, 29)</td><td>(176, 37)</td></tr>
-          <tr><td>Harvesters</td><td>(60, 17)</td><td>(124, 13)</td></tr>
-        </tbody>
-      </table>
-
-      <h3>Thumbnails</h3>
-      <div class="grid">
-        <figure>
-          <img src="output/pyramid_sobel_aligned_ncc_italil.jpg" alt="Italil (pyramid + NCC + Sobel)" />
-          <figcaption>Italil — Green: (38, 21) · Red: (76, 35)</figcaption>
-        </figure>
-        <figure>
-          <img src="output/pyramid_sobel_aligned_ncc_church.jpg" alt="Church (pyramid + NCC + Sobel)" />
-          <figcaption>Church — Green: (25, 4) · Red: (58, -4)</figcaption>
-        </figure>
-        <figure>
-          <img src="output/pyramid_sobel_aligned_ncc_three_generations.jpg" alt="Three Generations (pyramid + NCC + Sobel)" />
-          <figcaption>Three Generations — Green: (53, 14) · Red: (112, 11)</figcaption>
-        </figure>
-        <figure>
-          <img src="output/pyramid_sobel_aligned_ncc_lugano.jpg" alt="Lugano (pyramid + NCC + Sobel)" />
-          <figcaption>Lugano — Green: (41, -16) · Red: (93, -29)</figcaption>
-        </figure>
-        <figure>
-          <img src="output/pyramid_sobel_aligned_ncc_melons.jpg" alt="Melons (pyramid + NCC + Sobel)" />
-          <figcaption>Melons — Green: (82, 11) · Red: (178, 13)</figcaption>
-        </figure>
-        <figure>
-          <img src="output/pyramid_sobel_aligned_ncc_lastochikino.jpg" alt="Lastochikino (pyramid + NCC + Sobel)" />
-          <figcaption>Lastochikino — Green: (-3, -2) · Red: (75, -9)</figcaption>
-        </figure>
-        <figure>
-          <img src="output/pyramid_sobel_aligned_ncc_icon.jpg" alt="Icon (pyramid + NCC + Sobel)" />
-          <figcaption>Icon — Green: (41, 17) · Red: (89, 23)</figcaption>
-        </figure>
-        <figure>
-          <img src="output/pyramid_sobel_aligned_ncc_emir.jpg" alt="Emir (pyramid + NCC + Sobel)" />
-          <figcaption>Emir — Green: (49, 24) · Red: (155, -1047)</figcaption>
-        </figure>
-        <figure>
-          <img src="output/pyramid_sobel_aligned_ncc_siren.jpg" alt="Siren (pyramid + NCC + Sobel)" />
-          <figcaption>Siren — Green: (49, -6) · Red: (96, -25)</figcaption>
-        </figure>
-        <figure>
-          <img src="output/pyramid_sobel_aligned_ncc_self_portrait.jpg" alt="Self Portrait (pyramid + NCC + Sobel)" />
-          <figcaption>Self Portrait — Green: (79, 29) · Red: (176, 37)</figcaption>
-        </figure>
-        <figure>
-          <img src="output/pyramid_sobel_aligned_ncc_harvesters.jpg" alt="Harvesters (pyramid + NCC + Sobel)" />
-          <figcaption>Harvesters — Green: (60, 17) · Red: (124, 13)</figcaption>
-        </figure>
-      </div>
-    </section>
-
-    <section id="background">
-      <h2>Background</h2>
-      <p>
-        Sergei Mikhailovich Prokudin‑Gorskii (1863–1944) traveled across the Russian Empire
-        capturing thousands of scenes using three sequential exposures through <em>blue</em>,
-        <em>green</em>, and <em>red</em> filters on a single glass plate. Though color printing
-        wasn’t yet practical, his RGB negatives survived and were later digitized by the Library
-        of Congress. By aligning the three filtered images, we can reconstruct convincing color
-        photographs from the early 20th century.
-      </p>
     </section>
 
     <section id="overview">
-      <h2>Overview</h2>
+      <h2>Project Overview</h2>
       <p>
-        Goal: extract the three channel images from a digitized glass plate, align G and R to B,
-        and stack them into a color image with minimal artifacts. Start with small images
-        (e.g., <code>monastery.jpg</code>, <code>cathedral.jpg</code>), then handle large
-        <code>.tif</code> files using a coarse‑to‑fine image pyramid.
+        This project focuses on reconstructing color photographs from the Prokudin‑Gorskii collection.
+        The collection contains three separate black‑and‑white images of a scene, each through a different
+        color filter: red, green, and blue. The primary challenge is to take these three individual color
+        channel images and digitally align them. By correctly layering the red, green, and blue channels,
+        we can recreate the full‑color photograph.
       </p>
     </section>
 
-    <section id="details">
-      <h2>Details</h2>
-      <ul>
-        <li>Glass plates contain B, G, R in that vertical order (top → bottom).</li>
-        <li>Align via windowed search (e.g., displacements in [−15, 15]) using metrics such as L2 or NCC.</li>
-        <li>For large displacements, use a pyramid: estimate on a coarse scale, refine at finer scales.</li>
-        <li>Work on internal pixels to reduce border effects; convert to float.</li>
-        <li>Vectorize where possible; aim for &lt; 1 minute per image.</li>
-      </ul>
-      <div class="callout">
-        <strong>Note:</strong> For images like the Emir of Bukhara, raw intensity may differ across channels.
-        Consider edges/gradients or normalized metrics.
-      </div>
-      <h3>Skeleton & Data</h3>
-      <p>Data and starter code live in this folder. Example small images:</p>
-      <ul>
-        <li><code>monastery.jpg</code></li>
-        <li><code>cathedral.jpg</code></li>
-        <li><code>tobolsk.jpg</code></li>
-      </ul>
+    <section id="part1">
+      <h2>Part 1: Single‑Scale Alignment</h2>
+      <h3>My Approach</h3>
+      <p>
+        I split each glass‑plate scan vertically into three equal parts (B, G, R), convert to floats,
+        then run an exhaustive window search over shifts for G→B and R→B. For each candidate (dy, dx),
+        I compute the overlapping crop of the two channels and score it using either L2 (negative SSE)
+        or Normalized Cross‑Correlation (NCC). I also ignore a small inner border in the score to reduce
+        edge/border effects. The best shifts are applied via <code>np.roll</code> and the channels are stacked.
+      </p>
+      <p class="meta">
+        Code path: <code>single_scale_search</code> → overlap crops → score (L2/NCC) → choose best →
+        <code>np.roll</code> align and save. Helper: <code>single_scale_align</code> wraps IO and printing offsets.
+      </p>
     </section>
 
-    <section id="bells">
-      <h2>Bells & Whistles</h2>
-      <ul>
-        <li>Automatic cropping (detect and remove borders).</li>
-        <li>Automatic contrast stretching.</li>
-        <li>Automatic white balance (estimate illuminant; shift toward neutral).</li>
-        <li>Better color mapping between B/G/R filters and RGB output.</li>
-        <li>Edge/gradient‑based alignment features.</li>
-        <li>Search small rotations/scales in addition to translations.</li>
-      </ul>
-    </section>
+    
 
-    <section id="deliverables">
-      <h2>Deliverables</h2>
-      <ul>
-        <li>Short writeup of approach and decisions.</li>
-        <li>Results on all provided examples with displacement vectors.</li>
-        <li>Results on a few images from the LoC collection.</li>
-        <li>Failures (if any) with a brief explanation.</li>
-        <li>Bells & whistles: describe and show before/after where applicable.</li>
-      </ul>
-    </section>
-
-    <section id="advice">
-      <h2>Final Advice</h2>
-      <ul>
-        <li>Write reusable pyramid code (useful again in Project 2).</li>
-        <li>Avoid high‑level auto‑alignment or pyramid builders; implement the logic yourself.</li>
-        <li>Use fixed parameters for final outputs; a few failures are acceptable.</li>
-        <li>Convert to float; consider <code>np.roll</code> for shifts.</li>
-      </ul>
-    </section>
+    
 
     <section id="results">
       <h2>Results & Offsets</h2>
@@ -228,6 +109,86 @@
         <figure>
           <img src="output/single_scale_aligned_euclidean_distance_cathedral.jpg" alt="Cathedral (single-scale L2)" />
           <figcaption>Cathedral — Green offset: (5, 2) · Red offset: (12, 3)</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="part2">
+      <h2>Part 2: Multi‑Scale Pyramid Alignment</h2>
+      <h3>My Approach</h3>
+      <p>
+        I build a coarse‑to‑fine image pyramid (downscale by 2) for each channel, estimate shifts at the
+        coarsest level using the same single‑scale aligner, then iteratively upsample the estimate and refine
+        it at each finer level within a small window. I use NCC as the matching metric and pass the scaled
+        coarse estimate as the center of the finer‑level search. This handles large displacements efficiently
+        on the full‑resolution <code>.tif</code> images.
+      </p>
+      <p class="meta">Reference: the regular pyramid function before the dedicated “Sobel” section in your notebook.</p>
+
+      <h3>Large Images</h3>
+
+      <table class="offsets">
+        <thead><tr><th>Image</th><th>G offset (x, y)</th><th>R offset (x, y)</th></tr></thead>
+        <tbody>
+          <tr><td>Italil</td><td>(38, 21)</td><td>(76, 35)</td></tr>
+          <tr><td>Church</td><td>(25, 4)</td><td>(58, -4)</td></tr>
+          <tr><td>Three Generations</td><td>(53, 14)</td><td>(112, 11)</td></tr>
+          <tr><td>Lugano</td><td>(41, -16)</td><td>(93, -29)</td></tr>
+          <tr><td>Melons</td><td>(82, 11)</td><td>(178, 13)</td></tr>
+          <tr><td>Lastochikino</td><td>(-3, -2)</td><td>(75, -9)</td></tr>
+          <tr><td>Icon</td><td>(41, 17)</td><td>(89, 23)</td></tr>
+          <tr><td>Emir</td><td>(49, 24)</td><td>(155, -1047)</td></tr>
+          <tr><td>Siren</td><td>(49, -6)</td><td>(96, -25)</td></tr>
+          <tr><td>Self Portrait</td><td>(79, 29)</td><td>(176, 37)</td></tr>
+          <tr><td>Harvesters</td><td>(60, 17)</td><td>(124, 13)</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Thumbnails</h3>
+      <div class="grid">
+        <figure>
+          <img src="output/pyramid_aligned_ncc_italil.jpg" alt="Italil (pyramid + NCC)" />
+          <figcaption>Italil — Green: (38, 21) · Red: (76, 35)</figcaption>
+        </figure>
+        <figure>
+          <img src="output/pyramid_aligned_ncc_church.jpg" alt="Church (pyramid + NCC)" />
+          <figcaption>Church — Green: (25, 4) · Red: (58, -4)</figcaption>
+        </figure>
+        <figure>
+          <img src="output/pyramid_aligned_ncc_three_generations.jpg" alt="Three Generations (pyramid + NCC)" />
+          <figcaption>Three Generations — Green: (53, 14) · Red: (112, 11)</figcaption>
+        </figure>
+        <figure>
+          <img src="output/pyramid_aligned_ncc_lugano.jpg" alt="Lugano (pyramid + NCC)" />
+          <figcaption>Lugano — Green: (41, -16) · Red: (93, -29)</figcaption>
+        </figure>
+        <figure>
+          <img src="output/pyramid_aligned_ncc_melons.jpg" alt="Melons (pyramid + NCC)" />
+          <figcaption>Melons — Green: (82, 11) · Red: (178, 13)</figcaption>
+        </figure>
+        <figure>
+          <img src="output/pyramid_aligned_ncc_lastochikino.jpg" alt="Lastochikino (pyramid + NCC)" />
+          <figcaption>Lastochikino — Green: (-3, -2) · Red: (75, -9)</figcaption>
+        </figure>
+        <figure>
+          <img src="output/pyramid_aligned_ncc_icon.jpg" alt="Icon (pyramid + NCC)" />
+          <figcaption>Icon — Green: (41, 17) · Red: (89, 23)</figcaption>
+        </figure>
+        <figure>
+          <img src="output/pyramid_aligned_ncc_emir.jpg" alt="Emir (pyramid + NCC)" />
+          <figcaption>Emir — Green: (49, 24) · Red: (155, -1047)</figcaption>
+        </figure>
+        <figure>
+          <img src="output/pyramid_aligned_ncc_siren.jpg" alt="Siren (pyramid + NCC)" />
+          <figcaption>Siren — Green: (49, -6) · Red: (96, -25)</figcaption>
+        </figure>
+        <figure>
+          <img src="output/pyramid_aligned_ncc_self_portrait.jpg" alt="Self Portrait (pyramid + NCC)" />
+          <figcaption>Self Portrait — Green: (79, 29) · Red: (176, 37)</figcaption>
+        </figure>
+        <figure>
+          <img src="output/pyramid_aligned_ncc_harvesters.jpg" alt="Harvesters (pyramid + NCC)" />
+          <figcaption>Harvesters — Green: (60, 17) · Red: (124, 13)</figcaption>
         </figure>
       </div>
     </section>
