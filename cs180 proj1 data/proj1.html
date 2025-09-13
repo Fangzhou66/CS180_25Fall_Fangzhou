@@ -64,16 +64,17 @@
       <h2>Part 1: Single‑Scale Alignment</h2>
       <h3>My Approach</h3>
       <p>
-        I split each glass‑plate scan vertically into three equal parts (B, G, R), convert to floats,
-        then run an exhaustive window search over shifts for G→B and R→B. For each candidate (dy, dx),
-        I compute the overlapping crop of the two channels and score it using either L2 (negative SSE)
-        or Normalized Cross‑Correlation (NCC). I also ignore a small inner border in the score to reduce
-        edge/border effects. The best shifts are applied via <code>np.roll</code> and the channels are stacked.
+        - Split the input plate into three equal vertical thirds (top→bottom = B, G, R) and convert to float in [0,1].<br/>
+        - Crop a small outer frame from each channel for robustness on small images (e.g., <code>border = H//15</code>).<br/>
+        - For each channel to align (G→B, R→B), exhaustively search a window <code>dy,dx ∈ [−search_range, +search_range]</code>
+          around a center (default (0,0)).<br/>
+        - For a candidate shift, compute the valid overlap between reference (B) and target (G or R) using an
+          overlap-crop helper; then compute a score on the interior by trimming an inner margin
+          <code>inner_border = max(5, min(H,W)//50)</code> to suppress border artifacts.<br/>
+        - Scoring: L2 uses negative sum of squared differences (maximize), NCC uses normalized cross‑correlation (maximize).<br/>
+        - Keep the best shift, then apply with <code>np.roll</code>; finally stack <code>[aligned R, aligned G, B]</code> and save.
       </p>
-      <p class="meta">
-        Code path: <code>single_scale_search</code> → overlap crops → score (L2/NCC) → choose best →
-        <code>np.roll</code> align and save. Helper: <code>single_scale_align</code> wraps IO and printing offsets.
-      </p>
+      <p class="meta">Key functions: <code>single_scale_search</code> (core search), <code>single_scale_align</code> (IO + print/save).</p>
     </section>
 
     
@@ -117,78 +118,79 @@
       <h2>Part 2: Multi‑Scale Pyramid Alignment</h2>
       <h3>My Approach</h3>
       <p>
-        I build a coarse‑to‑fine image pyramid (downscale by 2) for each channel, estimate shifts at the
-        coarsest level using the same single‑scale aligner, then iteratively upsample the estimate and refine
-        it at each finer level within a small window. I use NCC as the matching metric and pass the scaled
-        coarse estimate as the center of the finer‑level search. This handles large displacements efficiently
-        on the full‑resolution <code>.tif</code> images.
+        - Preprocess: for large plates, trim a wider outer border (e.g., <code>border = H//10</code>) to avoid strong edges.<br/>
+        - Build pyramids for B/G/R by downscaling by 2 for <code>num_levels = 6</code> (coarsest → finest).<br/>
+        - Coarse level: run the same single‑scale search with NCC to get initial shifts <code>(dy,dx)</code> for G and R.<br/>
+        - Propagation: scale the coarse shifts by the downscale factor to the next finer level and use them as
+          centers for a small local search (e.g., <code>search_range = 5</code>).<br/>
+        - At the finest level, apply the final shifts via <code>np.roll</code> to form the RGB output and save.
       </p>
-      <p class="meta">Reference: the regular pyramid function before the dedicated “Sobel” section in your notebook.</p>
+      <p class="meta">Key functions: <code>pyramid_search</code> (recursive coarse→fine with centers), <code>single_scale_search</code> (NCC).</p>
 
       <h3>Large Images</h3>
 
       <table class="offsets">
         <thead><tr><th>Image</th><th>G offset (x, y)</th><th>R offset (x, y)</th></tr></thead>
         <tbody>
-          <tr><td>Italil</td><td>(38, 21)</td><td>(76, 35)</td></tr>
           <tr><td>Church</td><td>(25, 4)</td><td>(58, -4)</td></tr>
-          <tr><td>Three Generations</td><td>(53, 14)</td><td>(112, 11)</td></tr>
-          <tr><td>Lugano</td><td>(41, -16)</td><td>(93, -29)</td></tr>
-          <tr><td>Melons</td><td>(82, 11)</td><td>(178, 13)</td></tr>
-          <tr><td>Lastochikino</td><td>(-3, -2)</td><td>(75, -9)</td></tr>
-          <tr><td>Icon</td><td>(41, 17)</td><td>(89, 23)</td></tr>
-          <tr><td>Emir</td><td>(49, 24)</td><td>(155, -1047)</td></tr>
-          <tr><td>Siren</td><td>(49, -6)</td><td>(96, -25)</td></tr>
-          <tr><td>Self Portrait</td><td>(79, 29)</td><td>(176, 37)</td></tr>
-          <tr><td>Harvesters</td><td>(60, 17)</td><td>(124, 13)</td></tr>
+          <tr><td>Emir</td><td>(49, 24)</td><td>(107, 40)</td></tr>
+          <tr><td>Harvesters</td><td>(60, 17)</td><td>(124, 14)</td></tr>
+          <tr><td>Icon</td><td>(42, 17)</td><td>(90, 23)</td></tr>
+          <tr><td>Italil</td><td>(38, 22)</td><td>(77, 36)</td></tr>
+          <tr><td>Lastochikino</td><td>(-3, -2)</td><td>(76, -8)</td></tr>
+          <tr><td>Lugano</td><td>(41, -17)</td><td>(92, -29)</td></tr>
+          <tr><td>Melons</td><td>(80, 10)</td><td>(177, 13)</td></tr>
+          <tr><td>Self Portrait</td><td>(78, 29)</td><td>(176, 37)</td></tr>
+          <tr><td>Siren</td><td>(49, -6)</td><td>(96, -24)</td></tr>
+          <tr><td>Three Generations</td><td>(54, 12)</td><td>(111, 9)</td></tr>
         </tbody>
       </table>
 
       <h3>Thumbnails</h3>
       <div class="grid">
         <figure>
-          <img src="output/pyramid_aligned_ncc_italil.jpg" alt="Italil (pyramid + NCC)" />
-          <figcaption>Italil — Green: (38, 21) · Red: (76, 35)</figcaption>
-        </figure>
-        <figure>
           <img src="output/pyramid_aligned_ncc_church.jpg" alt="Church (pyramid + NCC)" />
           <figcaption>Church — Green: (25, 4) · Red: (58, -4)</figcaption>
         </figure>
         <figure>
-          <img src="output/pyramid_aligned_ncc_three_generations.jpg" alt="Three Generations (pyramid + NCC)" />
-          <figcaption>Three Generations — Green: (53, 14) · Red: (112, 11)</figcaption>
-        </figure>
-        <figure>
-          <img src="output/pyramid_aligned_ncc_lugano.jpg" alt="Lugano (pyramid + NCC)" />
-          <figcaption>Lugano — Green: (41, -16) · Red: (93, -29)</figcaption>
-        </figure>
-        <figure>
-          <img src="output/pyramid_aligned_ncc_melons.jpg" alt="Melons (pyramid + NCC)" />
-          <figcaption>Melons — Green: (82, 11) · Red: (178, 13)</figcaption>
-        </figure>
-        <figure>
-          <img src="output/pyramid_aligned_ncc_lastochikino.jpg" alt="Lastochikino (pyramid + NCC)" />
-          <figcaption>Lastochikino — Green: (-3, -2) · Red: (75, -9)</figcaption>
-        </figure>
-        <figure>
-          <img src="output/pyramid_aligned_ncc_icon.jpg" alt="Icon (pyramid + NCC)" />
-          <figcaption>Icon — Green: (41, 17) · Red: (89, 23)</figcaption>
-        </figure>
-        <figure>
           <img src="output/pyramid_aligned_ncc_emir.jpg" alt="Emir (pyramid + NCC)" />
-          <figcaption>Emir — Green: (49, 24) · Red: (155, -1047)</figcaption>
-        </figure>
-        <figure>
-          <img src="output/pyramid_aligned_ncc_siren.jpg" alt="Siren (pyramid + NCC)" />
-          <figcaption>Siren — Green: (49, -6) · Red: (96, -25)</figcaption>
-        </figure>
-        <figure>
-          <img src="output/pyramid_aligned_ncc_self_portrait.jpg" alt="Self Portrait (pyramid + NCC)" />
-          <figcaption>Self Portrait — Green: (79, 29) · Red: (176, 37)</figcaption>
+          <figcaption>Emir — Green: (49, 24) · Red: (107, 40)</figcaption>
         </figure>
         <figure>
           <img src="output/pyramid_aligned_ncc_harvesters.jpg" alt="Harvesters (pyramid + NCC)" />
-          <figcaption>Harvesters — Green: (60, 17) · Red: (124, 13)</figcaption>
+          <figcaption>Harvesters — Green: (60, 17) · Red: (124, 14)</figcaption>
+        </figure>
+        <figure>
+          <img src="output/pyramid_aligned_ncc_icon.jpg" alt="Icon (pyramid + NCC)" />
+          <figcaption>Icon — Green: (42, 17) · Red: (90, 23)</figcaption>
+        </figure>
+        <figure>
+          <img src="output/pyramid_aligned_ncc_italil.jpg" alt="Italil (pyramid + NCC)" />
+          <figcaption>Italil — Green: (38, 22) · Red: (77, 36)</figcaption>
+        </figure>
+        <figure>
+          <img src="output/pyramid_aligned_ncc_lastochikino.jpg" alt="Lastochikino (pyramid + NCC)" />
+          <figcaption>Lastochikino — Green: (-3, -2) · Red: (76, -8)</figcaption>
+        </figure>
+        <figure>
+          <img src="output/pyramid_aligned_ncc_lugano.jpg" alt="Lugano (pyramid + NCC)" />
+          <figcaption>Lugano — Green: (41, -17) · Red: (92, -29)</figcaption>
+        </figure>
+        <figure>
+          <img src="output/pyramid_aligned_ncc_siren.jpg" alt="Siren (pyramid + NCC)" />
+          <figcaption>Siren — Green: (49, -6) · Red: (96, -24)</figcaption>
+        </figure>
+        <figure>
+          <img src="output/pyramid_aligned_ncc_melons.jpg" alt="Melons (pyramid + NCC)" />
+          <figcaption>Melons — Green: (80, 10) · Red: (177, 13)</figcaption>
+        </figure>
+        <figure>
+          <img src="output/pyramid_aligned_ncc_self_portrait.jpg" alt="Self Portrait (pyramid + NCC)" />
+          <figcaption>Self Portrait — Green: (78, 29) · Red: (176, 37)</figcaption>
+        </figure>
+        <figure>
+          <img src="output/pyramid_aligned_ncc_three_generations.jpg" alt="Three Generations (pyramid + NCC)" />
+          <figcaption>Three Generations — Green: (54, 12) · Red: (111, 9)</figcaption>
         </figure>
       </div>
     </section>
