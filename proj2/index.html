@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fun with Filters and Frequencies! — CS180 Project 2</title>
+  <style>
+    :root {
+      --fg: #0f172a;
+      --muted: #475569;
+      --accent: #1d4ed8;
+      --bg: #ffffff;
+      --card: #f8fafc;
+      --border: #e2e8f0;
+      --code-bg: #0f172a;
+      --code-fg: #e2e8f0;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      color: var(--fg);
+      background: var(--bg);
+      line-height: 1.6;
+    }
+    header {
+      padding: 48px 20px 32px;
+      background: linear-gradient(180deg, #e0f2fe, #ffffff 55%);
+      border-bottom: 1px solid var(--border);
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px 60px;
+    }
+    h1 { margin: 0 0 12px; font-size: 32px; }
+    h2 { margin: 48px 0 16px; font-size: 26px; }
+    h3 { margin: 28px 0 12px; font-size: 20px; }
+    p { margin: 12px 0; color: var(--muted); }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .toc {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--card);
+      padding: 20px;
+      margin: 28px 0 40px;
+    }
+    .toc strong { display: block; margin-bottom: 12px; color: var(--fg); }
+    .toc a { display: inline-block; margin: 4px 12px 4px 0; }
+    section { margin-bottom: 60px; }
+    .panel {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      background: var(--card);
+      margin-top: 24px;
+    }
+    pre {
+      background: var(--code-bg);
+      color: var(--code-fg);
+      font-family: ui-monospace, SFMono-Regular, SFMono, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      padding: 16px;
+      border-radius: 12px;
+      overflow-x: auto;
+      font-size: 14px;
+      line-height: 1.45;
+      margin: 16px 0 20px;
+    }
+    code { font-family: inherit; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 24px 0;
+      font-size: 15px;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      text-align: left;
+    }
+    th { background: #eff6ff; font-weight: 600; }
+    .media-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      margin: 20px 0 12px;
+    }
+    figure {
+      margin: 0;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: #fff;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    figure img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    figcaption {
+      padding: 10px 12px 12px;
+      font-size: 14px;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      background: var(--card);
+      flex: 1;
+    }
+    .note {
+      border-left: 4px solid var(--accent);
+      background: #eff6ff;
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin: 16px 0;
+      color: var(--fg);
+    }
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 20px;
+      color: var(--muted);
+      font-size: 14px;
+      text-align: center;
+    }
+    @media (max-width: 640px) {
+      h1 { font-size: 26px; }
+      h2 { font-size: 22px; }
+      header { padding: 36px 18px 28px; }
+      .panel { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>Fun with Filters and Frequencies!</h1>
+      <p>CS180 (Fall 2025) · Project 2 write-up by Fangzhou. This page collects the experiments, code snippets, and image results from the filters &amp; frequencies assignment.</p>
+      <p><a href="../index.html">← Back to project hub</a></p>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="toc">
+      <strong>Jump to:</strong>
+      <a href="#overview">Overview</a>
+      <a href="#part1-1">1.1 Convolutions</a>
+      <a href="#part1-2">1.2 Finite Difference</a>
+      <a href="#part1-3">1.3 DoG</a>
+      <a href="#part2-1">2.1 Unsharp Masking</a>
+      <a href="#part2-2">2.2 Hybrid Images</a>
+      <a href="#part2-3">2.3 Gaussian &amp; Laplacian Stacks</a>
+      <a href="#part2-4">2.4 Multiresolution Blending</a>
+      <a href="#reflection">Reflection</a>
+    </div>
+
+    <section id="overview">
+      <h2>Project Overview</h2>
+      <p>The goal of this assignment is to develop intuition for 2D filtering and frequency-based image manipulation. I rebuilt convolutions from scratch, explored edge detection with and without smoothing, sharpened images with unsharp masking, created Oliva–Torralba style hybrid images, and finished with multiresolution blending (the classic “oraple” and new masked blends).</p>
+      <div class="note">All images shown here are generated from my notebook <code>proj2/filter_and_frequency.ipynb</code>. Sizes were kept below 0.8&nbsp;MB per requirement; click or tap any image to zoom in.</div>
+    </section>
+
+    <section id="part1-1">
+      <h2>Part 1.1 · Convolutions from Scratch</h2>
+      <p>I implemented two custom 2D convolution routines using pure NumPy: one with four nested loops and another that vectorises the inner loop. Both use zero padding so that outputs align with <code>scipy.signal.convolve2d</code>.</p>
+      <pre><code class="language-python">def convolve_4_for(image, kernel):
+    h, w = image.shape
+    kh, kw = kernel.shape
+    pad_h, pad_w = kh - 1, kw - 1
+    padded = np.pad(image, ((pad_h, pad_h), (pad_w, pad_w)))
+    out = np.zeros((h + 2 * pad_h - kh + 1, w + 2 * pad_w - kw + 1))
+    for i in range(padded.shape[0] - kh + 1):
+        for j in range(padded.shape[1] - kw + 1):
+            val = 0
+            for ki in range(kh):
+                for kj in range(kw):
+                    val += padded[i + ki, j + kj] * kernel[ki, kj]
+            out[i, j] = val
+    return out
+
+def convolve_2_for(image, kernel):
+    h, w = image.shape
+    kh, kw = kernel.shape
+    pad_h, pad_w = kh - 1, kw - 1
+    padded = np.pad(image, ((pad_h, pad_h), (pad_w, pad_w)))
+    out = np.zeros((h + 2 * pad_h - kh + 1, w + 2 * pad_w - kw + 1))
+    for i in range(padded.shape[0] - kh + 1):
+        for j in range(padded.shape[1] - kw + 1):
+            region = padded[i:i + kh, j:j + kw]
+            out[i, j] = np.sum(region * kernel)
+    return out</code></pre>
+      <p>A 9×9 box filter was applied to a grayscale selfie. Runtime comparisons show the cost of naïve looping:</p>
+      <table>
+        <thead>
+          <tr><th>Implementation</th><th>Time (s)</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>scipy.signal.convolve2d</code></td><td>0.046</td><td>Reference implementation</td></tr>
+          <tr><td><code>convolve_2_for</code></td><td>1.508</td><td>Vectorised inner loop via <code>np.sum</code></td></tr>
+          <tr><td><code>convolve_4_for</code></td><td>11.999</td><td>Fully explicit loops (baseline)</td></tr>
+        </tbody>
+      </table>
+      <div class="media-grid">
+        <figure>
+          <img src="selfie_box_filter_convolve2d.jpg" alt="Box filtered selfie via scipy" loading="lazy" />
+          <figcaption>Box blur via <code>convolve2d</code>.</figcaption>
+        </figure>
+        <figure>
+          <img src="selfie_box_filter_convolve_2_for.jpg" alt="Box filtered selfie via 2-loop convolution" loading="lazy" />
+          <figcaption>Same blur using my 2-loop version (matching output).</figcaption>
+        </figure>
+        <figure>
+          <img src="selfie_box_filter_convolve_4_for.jpg" alt="Box filtered selfie via 4-loop convolution" loading="lazy" />
+          <figcaption>4-loop kernel agrees but runs 250× slower.</figcaption>
+        </figure>
+      </div>
+      <p>I repeated the experiment with finite-difference operators <code>D<sub>x</sub>=[1,0,-1]</code> and <code>D<sub>y</sub>=[1,0,-1]<sup>T</sup></code> to obtain horizontal and vertical edges:</p>
+      <div class="media-grid">
+        <figure>
+          <img src="selfie_gradient_dx_convolve2d.png" alt="Selfie horizontal edges via scipy" loading="lazy" />
+          <figcaption>Horizontal edges (<code>convolve2d</code>).</figcaption>
+        </figure>
+        <figure>
+          <img src="selfie_gradient_dx_convolve_2_for.png" alt="Selfie horizontal edges via 2-loop convolution" loading="lazy" />
+          <figcaption>Horizontal edges (2-loop). Outputs line up pixel-wise.</figcaption>
+        </figure>
+        <figure>
+          <img src="selfie_gradient_dx_convolve_4_for.png" alt="Selfie horizontal edges via 4-loop convolution" loading="lazy" />
+          <figcaption>Horizontal edges (4-loop). Slow but correct.</figcaption>
+        </figure>
+        <figure>
+          <img src="selfie_gradient_dy_convolve2d.png" alt="Selfie vertical edges via scipy" loading="lazy" />
+          <figcaption>Vertical edges (<code>convolve2d</code>).</figcaption>
+        </figure>
+        <figure>
+          <img src="selfie_gradient_dy_convolve_2_for.png" alt="Selfie vertical edges via 2-loop convolution" loading="lazy" />
+          <figcaption>Vertical edges (2-loop).</figcaption>
+        </figure>
+        <figure>
+          <img src="selfie_gradient_dy_convolve_4_for.png" alt="Selfie vertical edges via 4-loop convolution" loading="lazy" />
+          <figcaption>Vertical edges (4-loop).</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="part1-2">
+      <h2>Part 1.2 · Finite Difference Operator</h2>
+      <p>I applied the finite difference pair directly to the canonical Cameraman image (mode=<code>same</code>) and combined gradients into magnitudes. A qualitative threshold of 80 isolates major contours while suppressing noise.</p>
+      <div class="media-grid">
+        <figure>
+          <img src="cameraman_horizontal_edges.png" alt="Cameraman horizontal edges" loading="lazy" />
+          <figcaption>∂I/∂y highlights horizontal transitions.</figcaption>
+        </figure>
+        <figure>
+          <img src="cameraman_vertical_edges.png" alt="Cameraman vertical edges" loading="lazy" />
+          <figcaption>∂I/∂x shows vertical edges.</figcaption>
+        </figure>
+        <figure>
+          <img src="cameraman_gradient_magnitude.png" alt="Cameraman gradient magnitude" loading="lazy" />
+          <figcaption>Gradient magnitude map √(G<sub>x</sub><sup>2</sup>+G<sub>y</sub><sup>2</sup>).</figcaption>
+        </figure>
+        <figure>
+          <img src="cameraman_gradient_magnitude_thresholded.png" alt="Binarised gradient magnitude" loading="lazy" />
+          <figcaption>Binary edge map (threshold = 80).</figcaption>
+        </figure>
+      </div>
+      <figure>
+        <img src="gradient_threshold_animation.gif" alt="Animation sweeping different thresholds for edge detection" loading="lazy" />
+        <figcaption>Threshold sweep (10 → 140). Lower thresholds bring noise; 80 balanced detail vs clutter.</figcaption>
+      </figure>
+    </section>
+
+    <section id="part1-3">
+      <h2>Part 1.3 · Derivative of Gaussian (DoG) Filter</h2>
+      <p>To reduce noise before differentiation, I built a 15×15 Gaussian kernel (<code>σ = 1.5</code>) from <code>cv2.getGaussianKernel</code>, smoothed Cameraman, and repeated the gradient steps. I also convolved the Gaussian with <code>D<sub>x</sub></code> / <code>D<sub>y</sub></code> to obtain derivative-of-Gaussian filters and verified equivalence with the two-stage approach.</p>
+      <div class="media-grid">
+        <figure>
+          <img src="gaussian_2d_kernel.png" alt="Visualisation of 2D Gaussian kernel" loading="lazy" />
+          <figcaption>Constructed 2D Gaussian kernel.</figcaption>
+        </figure>
+        <figure>
+          <img src="derivative_of_gaussian_dx.png" alt="Derivative of Gaussian in x" loading="lazy" />
+          <figcaption>DoG in the x direction.</figcaption>
+        </figure>
+        <figure>
+          <img src="derivative_of_gaussian_dy.png" alt="Derivative of Gaussian in y" loading="lazy" />
+          <figcaption>DoG in the y direction.</figcaption>
+        </figure>
+      </div>
+      <div class="media-grid">
+        <figure>
+          <img src="cameraman_gaussian.png" alt="Cameraman blurred with Gaussian" loading="lazy" />
+          <figcaption>Smoothed Cameraman.</figcaption>
+        </figure>
+        <figure>
+          <img src="gaussian_cameraman_horizontal_edges.png" alt="Horizontal edges after Gaussian smoothing" loading="lazy" />
+          <figcaption>∂I/∂y after smoothing.</figcaption>
+        </figure>
+        <figure>
+          <img src="gaussian_cameraman_vertical_edges.png" alt="Vertical edges after Gaussian smoothing" loading="lazy" />
+          <figcaption>∂I/∂x after smoothing.</figcaption>
+        </figure>
+        <figure>
+          <img src="gaussian_cameraman_gradient_magnitude.png" alt="Gradient magnitude after Gaussian smoothing" loading="lazy" />
+          <figcaption>Gradient magnitude; fewer speckles.</figcaption>
+        </figure>
+      </div>
+      <div class="media-grid">
+        <figure>
+          <img src="dog_cameraman_horizontal_edges.png" alt="Horizontal DoG response" loading="lazy" />
+          <figcaption>DoG ∂I/∂y (single convolution).</figcaption>
+        </figure>
+        <figure>
+          <img src="dog_cameraman_vertical_edges.png" alt="Vertical DoG response" loading="lazy" />
+          <figcaption>DoG ∂I/∂x.</figcaption>
+        </figure>
+        <figure>
+          <img src="dog_cameraman_gradient_magnitude.png" alt="DoG gradient magnitude" loading="lazy" />
+          <figcaption>Magnitude closely matches the two-pass approach.</figcaption>
+        </figure>
+        <figure>
+          <img src="cameraman_dog_gradient_magnitude_thresholded.png" alt="Thresholded DoG edge map" loading="lazy" />
+          <figcaption>Edge map with threshold = 40 (lower value thanks to reduced noise).</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="part2-1">
+      <h2>Part 2.1 · Image Sharpening</h2>
+      <p>Sharpening uses unsharp masking: extract high frequencies by subtracting a Gaussian blur, then add them back with strength <code>α</code>. I implemented both the multi-step version and the single-convolution unsharp mask filter.</p>
+      <pre><code class="language-python">def sharpen_image(image_bgr, name, alpha=3, ksize=15, sigma=1.5):
+    g = cv2.getGaussianKernel(ksize, sigma)
+    gaussian_2d = g @ g.T
+    b, g, r = image_bgr[:, :, 0], image_bgr[:, :, 1], image_bgr[:, :, 2]
+    blurred = [sp.signal.convolve2d(channel, gaussian_2d, mode='same') for channel in (r, g, b)]
+    high = [channel - blur for channel, blur in zip((r, g, b), blurred)]
+    sharpened = np.clip(np.dstack([r, g, b]) + alpha * np.dstack(high), 0, 255).astype(np.uint8)
+    return blurred, high, sharpened
+
+def unsharp_kernel(alpha, ksize=15, sigma=1.5):
+    g = cv2.getGaussianKernel(ksize, sigma)
+    gaussian_2d = g @ g.T
+    impulse = np.zeros_like(gaussian_2d)
+    impulse[ksize // 2, ksize // 2] = 1
+    return (1 + alpha) * impulse - alpha * gaussian_2d</code></pre>
+      <h3>Taj Mahal</h3>
+      <div class="media-grid">
+        <figure>
+          <img src="blurred_taj.png" alt="Taj Mahal blurred" loading="lazy" />
+          <figcaption>Gaussian blur (σ = 1.5, 15×15 kernel).</figcaption>
+        </figure>
+        <figure>
+          <img src="high_freq_taj.png" alt="High frequency residual, Taj" loading="lazy" />
+          <figcaption>Raw high-frequency residual.</figcaption>
+        </figure>
+        <figure>
+          <img src="normalized_high_freq_taj.png" alt="Normalised high frequencies" loading="lazy" />
+          <figcaption>Normalised for visualisation.</figcaption>
+        </figure>
+        <figure>
+          <img src="sharpened_image_taj.png" alt="Sharpened Taj" loading="lazy" />
+          <figcaption>Sharpened result (α = 3).</figcaption>
+        </figure>
+      </div>
+      <div class="media-grid">
+        <figure>
+          <img src="sharpened_taj_single_convolution.png" alt="Single convolution unsharp mask on Taj" loading="lazy" />
+          <figcaption>Single-filter implementation (α = 3).</figcaption>
+        </figure>
+        <figure>
+          <img src="sharpened_taj_single_convolution_alpha_10.png" alt="Over-sharpened Taj" loading="lazy" />
+          <figcaption>α = 10 accentuates edges but creates ringing &amp; halos.</figcaption>
+        </figure>
+      </div>
+      <h3>Tiananmen Square</h3>
+      <div class="media-grid">
+        <figure>
+          <img src="blurred_tiananmen.png" alt="Blurred Tiananmen" loading="lazy" />
+          <figcaption>Blurred reference (same kernel).</figcaption>
+        </figure>
+        <figure>
+          <img src="high_freq_tiananmen.png" alt="High frequencies for Tiananmen" loading="lazy" />
+          <figcaption>High-frequency residual.</figcaption>
+        </figure>
+        <figure>
+          <img src="sharpened_image_tiananmen.png" alt="Sharpened Tiananmen" loading="lazy" />
+          <figcaption>Sharpened (α = 3).</figcaption>
+        </figure>
+        <figure>
+          <img src="sharpened_tiananmen_single_convolution.png" alt="Single convolution result for Tiananmen" loading="lazy" />
+          <figcaption>Single-filter version (α = 3).</figcaption>
+        </figure>
+      </div>
+      <div class="media-grid">
+        <figure>
+          <img src="blurred_chelsea.png" alt="Blurred Chelsea" loading="lazy" />
+          <figcaption>Intentionally blurred reference.</figcaption>
+        </figure>
+        <figure>
+          <img src="high_freq_chelsea.png" alt="High frequencies, Chelsea" loading="lazy" />
+          <figcaption>Recovered high-frequency residual.</figcaption>
+        </figure>
+        <figure>
+          <img src="sharpened_chelsea_single_convolution.png" alt="Chelsea sharpened with α=3" loading="lazy" />
+          <figcaption>Sharpened with α = 3 restores crisp detail.</figcaption>
+        </figure>
+        <figure>
+          <img src="sharpened_chelsea_single_convolution_alpha_10.png" alt="Chelsea oversharpened" loading="lazy" />
+          <figcaption>α = 10 overshoots and introduces halos.</figcaption>
+        </figure>
+      </div>
+      <p>Sharpening a naturally sharp image (Chelsea) after blurring recovers detail with moderate α, but strong α values produce ringing along high-contrast edges — a good reminder to tune α gently.</p>
+    </section>
+
+    <section id="part2-2">
+      <h2>Part 2.2 · Hybrid Images</h2>
+      <p>Hybrid images combine low frequencies from one aligned photo with high frequencies from another. Alignment is crucial; I used the provided interactive tool to pick corresponding points before filtering.</p>
+      <h3>Derek + Nutmeg (with frequency analysis)</h3>
+      <div class="media-grid">
+        <figure>
+          <img src="derek_aligned.png" alt="Aligned Derek" loading="lazy" />
+          <figcaption>Low-frequency source (Derek).</figcaption>
+        </figure>
+        <figure>
+          <img src="cat_aligned.png" alt="Aligned Nutmeg" loading="lazy" />
+          <figcaption>High-frequency source (Nutmeg).</figcaption>
+        </figure>
+        <figure>
+          <img src="low_frequencies_derek.png" alt="Low-pass filtered Derek" loading="lazy" />
+          <figcaption>Low-pass (σ = 10).</figcaption>
+        </figure>
+        <figure>
+          <img src="high_frequencies_cat.png" alt="High-pass filtered Nutmeg" loading="lazy" />
+          <figcaption>High-pass (impulse − Gaussian).</figcaption>
+        </figure>
+        <figure>
+          <img src="hybrid_image_derek_cat.png" alt="Hybrid Derek + Nutmeg" loading="lazy" />
+          <figcaption>Hybrid result (close = cat, far = Derek).</figcaption>
+        </figure>
+      </div>
+      <div class="media-grid">
+        <figure>
+          <img src="derek_original_frequency_spectrum.png" alt="Fourier spectrum of Derek" loading="lazy" />
+          <figcaption>Log |FFT| of Derek (full spectrum).</figcaption>
+        </figure>
+        <figure>
+          <img src="cat_original_frequency_spectrum.png" alt="Fourier spectrum of Nutmeg" loading="lazy" />
+          <figcaption>Nutmeg spectrum.</figcaption>
+        </figure>
+        <figure>
+          <img src="derek_low_freq_frequency_spectrum.png" alt="Fourier spectrum of low frequencies" loading="lazy" />
+          <figcaption>Low frequencies after Gaussian blur.</figcaption>
+        </figure>
+        <figure>
+          <img src="cat_high_freq_frequency_spectrum.png" alt="Fourier spectrum of high frequencies" loading="lazy" />
+          <figcaption>High-frequency emphasis.</figcaption>
+        </figure>
+        <figure>
+          <img src="hybrid_image_frequency_spectrum.png" alt="Hybrid Fourier spectrum" loading="lazy" />
+          <figcaption>Hybrid spectrum blends centre + periphery energy.</figcaption>
+        </figure>
+      </div>
+      <h3>Tank Man + Tiananmen Gate</h3>
+      <div class="media-grid">
+        <figure>
+          <img src="low_frequencies_renminhuitang.png" alt="Low frequencies of Tiananmen" loading="lazy" />
+          <figcaption>Low-pass background.</figcaption>
+        </figure>
+        <figure>
+          <img src="high_frequencies_tankman.png" alt="High frequencies of Tank Man" loading="lazy" />
+          <figcaption>High-pass Tank Man.</figcaption>
+        </figure>
+        <figure>
+          <img src="hybrid_image_renminhuitang_tankman.png" alt="Hybrid Tank Man" loading="lazy" />
+          <figcaption>Hybrid blends protester silhouette into plaza.</figcaption>
+        </figure>
+      </div>
+      <h3>Mao + Xi</h3>
+      <div class="media-grid">
+        <figure>
+          <img src="low_frequencies_xijinping.png" alt="Low frequencies of Xi" loading="lazy" />
+          <figcaption>Low-pass portrait of Xi.</figcaption>
+        </figure>
+        <figure>
+          <img src="high_frequencies_maozedong.png" alt="High frequencies of Mao" loading="lazy" />
+          <figcaption>High-pass Mao detail.</figcaption>
+        </figure>
+        <figure>
+          <img src="hybrid_image_xijinping_maozedong.png" alt="Hybrid Mao + Xi" loading="lazy" />
+          <figcaption>Mao’s features emerge up close; Xi dominates at distance.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="part2-3">
+      <h2>Part 2.3 · Gaussian &amp; Laplacian Stacks</h2>
+      <p>Stacks keep each level at full resolution (no downsampling) and are built from repeated blurring; Laplacian stacks subtract consecutive Gaussian levels. I generated six levels for both apple and orange to mirror Szeliski’s figure.</p>
+      <h3>Apple Gaussian Stack</h3>
+      <div class="media-grid">
+        <figure><img src="apple_gaussian_stack_0.png" alt="Apple Gaussian level 0" loading="lazy" /><figcaption>Level 0</figcaption></figure>
+        <figure><img src="apple_gaussian_stack_1.png" alt="Apple Gaussian level 1" loading="lazy" /><figcaption>Level 1</figcaption></figure>
+        <figure><img src="apple_gaussian_stack_2.png" alt="Apple Gaussian level 2" loading="lazy" /><figcaption>Level 2</figcaption></figure>
+        <figure><img src="apple_gaussian_stack_3.png" alt="Apple Gaussian level 3" loading="lazy" /><figcaption>Level 3</figcaption></figure>
+        <figure><img src="apple_gaussian_stack_4.png" alt="Apple Gaussian level 4" loading="lazy" /><figcaption>Level 4</figcaption></figure>
+        <figure><img src="apple_gaussian_stack_5.png" alt="Apple Gaussian level 5" loading="lazy" /><figcaption>Level 5</figcaption></figure>
+      </div>
+      <h3>Apple Laplacian Stack</h3>
+      <div class="media-grid">
+        <figure><img src="apple_laplacian_stack_0.png" alt="Apple Laplacian level 0" loading="lazy" /><figcaption>Level 0</figcaption></figure>
+        <figure><img src="apple_laplacian_stack_1.png" alt="Apple Laplacian level 1" loading="lazy" /><figcaption>Level 1</figcaption></figure>
+        <figure><img src="apple_laplacian_stack_2.png" alt="Apple Laplacian level 2" loading="lazy" /><figcaption>Level 2</figcaption></figure>
+        <figure><img src="apple_laplacian_stack_3.png" alt="Apple Laplacian level 3" loading="lazy" /><figcaption>Level 3</figcaption></figure>
+        <figure><img src="apple_laplacian_stack_4.png" alt="Apple Laplacian level 4" loading="lazy" /><figcaption>Level 4</figcaption></figure>
+        <figure><img src="apple_laplacian_stack_5.png" alt="Apple Laplacian level 5" loading="lazy" /><figcaption>Level 5</figcaption></figure>
+      </div>
+      <h3>Orange Gaussian &amp; Laplacian Stacks</h3>
+      <div class="media-grid">
+        <figure><img src="orange_gaussian_stack_0.png" alt="Orange Gaussian level 0" loading="lazy" /><figcaption>Level 0</figcaption></figure>
+        <figure><img src="orange_gaussian_stack_1.png" alt="Orange Gaussian level 1" loading="lazy" /><figcaption>Level 1</figcaption></figure>
+        <figure><img src="orange_gaussian_stack_2.png" alt="Orange Gaussian level 2" loading="lazy" /><figcaption>Level 2</figcaption></figure>
+        <figure><img src="orange_gaussian_stack_3.png" alt="Orange Gaussian level 3" loading="lazy" /><figcaption>Level 3</figcaption></figure>
+        <figure><img src="orange_gaussian_stack_4.png" alt="Orange Gaussian level 4" loading="lazy" /><figcaption>Level 4</figcaption></figure>
+        <figure><img src="orange_gaussian_stack_5.png" alt="Orange Gaussian level 5" loading="lazy" /><figcaption>Level 5</figcaption></figure>
+      </div>
+      <div class="media-grid">
+        <figure><img src="orange_laplacian_stack_0.png" alt="Orange Laplacian level 0" loading="lazy" /><figcaption>Level 0</figcaption></figure>
+        <figure><img src="orange_laplacian_stack_1.png" alt="Orange Laplacian level 1" loading="lazy" /><figcaption>Level 1</figcaption></figure>
+        <figure><img src="orange_laplacian_stack_2.png" alt="Orange Laplacian level 2" loading="lazy" /><figcaption>Level 2</figcaption></figure>
+        <figure><img src="orange_laplacian_stack_3.png" alt="Orange Laplacian level 3" loading="lazy" /><figcaption>Level 3</figcaption></figure>
+        <figure><img src="orange_laplacian_stack_4.png" alt="Orange Laplacian level 4" loading="lazy" /><figcaption>Level 4</figcaption></figure>
+        <figure><img src="orange_laplacian_stack_5.png" alt="Orange Laplacian level 5" loading="lazy" /><figcaption>Level 5</figcaption></figure>
+      </div>
+    </section>
+
+    <section id="part2-4">
+      <h2>Part 2.4 · Multiresolution Blending</h2>
+      <p>I used the Laplacian stacks together with blurred masks to blend images level-by-level. The classic oraple uses a vertical step mask; additional blends explore different masks and subjects.</p>
+      <h3>Oraple (Apple × Orange)</h3>
+      <div class="media-grid">
+        <figure><img src="apple_left_image.png" alt="Apple contribution" loading="lazy" /><figcaption>Apple contribution after masking.</figcaption></figure>
+        <figure><img src="orange_right_image.png" alt="Orange contribution" loading="lazy" /><figcaption>Orange contribution.</figcaption></figure>
+        <figure><img src="orange_apple_image.png" alt="Final oraple" loading="lazy" /><figcaption>Final blended oraple.</figcaption></figure>
+      </div>
+      <div class="media-grid">
+        <figure><img src="oraple_level_0.png" alt="Blend level 0" loading="lazy" /><figcaption>Level 0</figcaption></figure>
+        <figure><img src="oraple_level_1.png" alt="Blend level 1" loading="lazy" /><figcaption>Level 1</figcaption></figure>
+        <figure><img src="oraple_level_2.png" alt="Blend level 2" loading="lazy" /><figcaption>Level 2</figcaption></figure>
+        <figure><img src="oraple_level_3.png" alt="Blend level 3" loading="lazy" /><figcaption>Level 3</figcaption></figure>
+        <figure><img src="oraple_level_4.png" alt="Blend level 4" loading="lazy" /><figcaption>Level 4</figcaption></figure>
+        <figure><img src="oraple_level_5.png" alt="Blend level 5" loading="lazy" /><figcaption>Level 5</figcaption></figure>
+      </div>
+      <h3>Soccer Ball × Watermelon (step mask)</h3>
+      <div class="media-grid">
+        <figure><img src="soccer_watermelon_image.png" alt="Soccer ball blended with watermelon" loading="lazy" /><figcaption>Blend with a vertical step mask (σ = 10 for mask blur).</figcaption></figure>
+      </div>
+      <p>The vertical seam gets softly hidden by blurring the binary mask before applying each Laplacian level.</p>
+      <h3>Monet × Real Life (irregular mask)</h3>
+      <p>I created an irregular mask to paint Monet’s colours onto a photo of the same scene.</p>
+      <div class="media-grid">
+        <figure><img src="grassland_aligned.png" alt="Aligned grassland" loading="lazy" /><figcaption>Aligned photograph.</figcaption></figure>
+        <figure><img src="monet_aligned.png" alt="Aligned Monet painting" loading="lazy" /><figcaption>Aligned Monet painting.</figcaption></figure>
+        <figure><img src="monet_mask.png" alt="Monet mask" loading="lazy" /><figcaption>Artistically shaped mask.</figcaption></figure>
+        <figure><img src="monet_irl_image.png" alt="Monet blended with real photo" loading="lazy" /><figcaption>Final blend; Monet brushstrokes overlay real grassland.</figcaption></figure>
+      </div>
+    </section>
+
+    <section id="reflection">
+      <h2>Most Important Thing I Learned</h2>
+      <p>Designing multiresolution blends taught me how critical aligned frequency content and mask blur radii are — tiny changes in mask smoothing can make seams either invisible or painfully obvious. Tuning those blur levels felt like “frequency sculpting,” and it gave me a new appreciation for the Burt &amp; Adelson pipeline.</p>
+    </section>
+  </main>
+
+  <footer>
+    © Fangzhou — CS180 Project 2 (Fun with Filters and Frequencies!)
+  </footer>
+</body>
+</html>
