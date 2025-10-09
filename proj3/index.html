@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Project 3 · Auto-Stitching Photo Mosaics</title>
+  <meta name="description" content="CS180 Project 3 report — Auto-stitching photo mosaics with homographies and blending." />
+  <meta name="robots" content="noindex" />
+  <style>
+    :root {
+      --fg: #0b1120;
+      --muted: #475569;
+      --accent: #2563eb;
+      --bg: #ffffff;
+      --panel: #f8fafc;
+      --border: #e2e8f0;
+      --radius: 14px;
+      --shadow: 0 12px 36px rgba(15, 23, 42, 0.08);
+      --max-width: 1024px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--fg);
+      background: var(--bg);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+    header {
+      background: linear-gradient(160deg, #e0e7ff 0%, #ffffff 60%);
+      border-bottom: 1px solid var(--border);
+      padding: 48px 20px 56px;
+    }
+    .container {
+      width: 100%;
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    h1 {
+      font-size: clamp(32px, 5vw, 44px);
+      margin: 0 0 12px;
+      letter-spacing: -0.02em;
+    }
+    h2 {
+      font-size: clamp(24px, 4vw, 30px);
+      margin: 48px 0 12px;
+      letter-spacing: -0.01em;
+    }
+    h3 {
+      font-size: 18px;
+      margin: 20px 0 8px;
+      color: #111827;
+    }
+    p {
+      color: var(--muted);
+      margin: 12px 0;
+    }
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .lead {
+      max-width: 680px;
+      font-size: 18px;
+      color: #1f2937;
+      margin-top: 12px;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin: 28px 0;
+      box-shadow: var(--shadow);
+    }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+    .meta-card {
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: rgba(37, 99, 235, 0.08);
+      color: #1d4ed8;
+      font-weight: 500;
+    }
+    .toc {
+      margin-top: 32px;
+      display: grid;
+      gap: 8px;
+      max-width: 420px;
+    }
+    .toc a {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: var(--fg);
+      font-weight: 500;
+      transition: transform 120ms ease, box-shadow 120ms ease;
+    }
+    .toc a span {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 400;
+    }
+    .toc a:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.1);
+    }
+    main {
+      padding: 48px 0 80px;
+    }
+    section + section {
+      margin-top: 28px;
+    }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+      margin: 24px 0;
+    }
+    figure {
+      margin: 0;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+    }
+    figure img {
+      width: 100%;
+      display: block;
+    }
+    figcaption {
+      padding: 14px 16px 16px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .side-by-side {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+      margin: 24px 0;
+    }
+    .callout {
+      border-left: 4px solid var(--accent);
+      padding: 16px 22px;
+      background: rgba(37, 99, 235, 0.05);
+      border-radius: 12px;
+      color: #1e3a8a;
+      font-size: 15px;
+    }
+    blockquote {
+      margin: 24px 0;
+      padding: 0 0 0 18px;
+      border-left: 4px solid var(--accent);
+      color: #1f2937;
+      font-style: italic;
+      background: rgba(37, 99, 235, 0.05);
+    }
+    ul {
+      margin: 16px 0;
+      padding-left: 20px;
+      color: var(--muted);
+    }
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 28px 20px 36px;
+      background: #f8fafc;
+      color: var(--muted);
+      text-align: center;
+      font-size: 14px;
+    }
+    @media (max-width: 640px) {
+      header { padding: 40px 20px 48px; }
+      .panel { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>Project 3: Auto-Stitching Photo Mosaics</h1>
+      <p class="lead">
+        Manually selected correspondences, homography estimation, inverse warping, and multi-band blending come together to align everyday scenes into seamless panoramas.
+      </p>
+      <div class="meta-grid">
+        <div class="meta-card">CS180 · Fall 2025</div>
+        <div class="meta-card">Author · Fangzhou</div>
+        <div class="meta-card">Tools · NumPy · OpenCV · Matplotlib</div>
+      </div>
+      <nav class="toc">
+        <a href="#overview">Project overview <span>high-level goals &amp; challenges</span></a>
+        <a href="#part-a1">Part A.1 · Capture <span>careful image acquisition</span></a>
+        <a href="#part-a2">Part A.2 · Homographies <span>solving for planar projections</span></a>
+        <a href="#part-a3">Part A.3 · Warping <span>nearest vs. bilinear interpolation</span></a>
+        <a href="#part-a4">Part A.4 · Mosaics <span>masking, blending, takeaways</span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <section id="overview">
+        <h2>Project Overview</h2>
+        <p>
+          The goal of this project is to automatically align and stitch overlapping photographs into wide mosaics.
+          I selected multiple scenes, gathered shots by rotating around a fixed center of projection, and then
+          built a pipeline that (1) gathers manual point correspondences, (2) solves for planar homographies with
+          least squares, (3) performs inverse mapping with either nearest-neighbor or bilinear interpolation, and
+          (4) blends the warped views into a single composite using soft masks.
+        </p>
+        <p>
+          The implementation leans on the Direct Linear Transform (DLT) formulation for homography estimation,
+          extends the images with padding to give the warp room to breathe, and blends contributions by averaging
+          each pixel according to per-image weight masks. Below I document each stage with representative visuals
+          and observations.
+        </p>
+        <div class="panel">
+          <h3>Key lessons while building the pipeline</h3>
+          <ul>
+            <li>Keeping the camera stationary except for rotation is crucial—small translations manifest as parallax and break planar assumptions.</li>
+            <li>Numerical stability matters: normalizing coordinates before solving the DLT system improves homography estimates when points cluster.</li>
+            <li>Inverse warping avoids holes, but interpolation quality dictates visual fidelity; bilinear interpolation is worth the extra compute.</li>
+            <li>Alpha-style masks that taper near the overlap prevent ghosts far better than hard cuts between warped images.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="part-a1">
+        <h2>Part A.1 · Shoot the Pictures</h2>
+        <p>
+          Each sequence below was captured handheld by pivoting the phone around the same point, ensuring the center
+          of projection stays fixed. I bracketed overlap to guarantee robust correspondence picking later on.
+        </p>
+
+        <h3>During Lecture · three-shot sweep</h3>
+        <div class="gallery">
+          <figure>
+            <img src="IMG_0123.jpg" alt="During lecture — left frame" loading="lazy" />
+            <figcaption>Left exposure: front of the lecture hall with the board centered.</figcaption>
+          </figure>
+          <figure>
+            <img src="IMG_0124.jpg" alt="During lecture — middle frame" loading="lazy" />
+            <figcaption>Middle exposure: board and classmates framed centrally.</figcaption>
+          </figure>
+          <figure>
+            <img src="IMG_0125.jpg" alt="During lecture — right frame" loading="lazy" />
+            <figcaption>Right exposure: finishing the sweep across the hall.</figcaption>
+          </figure>
+        </div>
+
+        <h3>Outside Soda · quick panorama on Memorial Glade</h3>
+        <div class="gallery">
+          <figure>
+            <img src="IMG_0117.jpg" alt="Outside Soda — left frame" loading="lazy" />
+            <figcaption>Left exposure with the Soda Hall facade leading the composition.</figcaption>
+          </figure>
+          <figure>
+            <img src="IMG_0118.jpg" alt="Outside Soda — middle frame" loading="lazy" />
+            <figcaption>Middle exposure aligns the center of the building.</figcaption>
+          </figure>
+          <figure>
+            <img src="IMG_0119-2.jpg" alt="Outside Soda — right frame" loading="lazy" />
+            <figcaption>Right exposure captures the adjacent trees and sky.</figcaption>
+          </figure>
+        </div>
+
+        <h3>Inside Sky Lab · interior sequence</h3>
+        <div class="gallery">
+          <figure>
+            <img src="IMG_0131.jpg" alt="Inside Sky Lab — left frame" loading="lazy" />
+            <figcaption>Left exposure showcasing the lab benches and ceiling fixtures.</figcaption>
+          </figure>
+          <figure>
+            <img src="IMG_0132.jpg" alt="Inside Sky Lab — middle frame" loading="lazy" />
+            <figcaption>Middle exposure aligns the main aisle of the lab.</figcaption>
+          </figure>
+          <figure>
+            <img src="IMG_0133.jpg" alt="Inside Sky Lab — right frame" loading="lazy" />
+            <figcaption>Right exposure finishes the sweep across the workspace.</figcaption>
+          </figure>
+        </div>
+
+        <div class="callout">
+          Careful capture makes the downstream math forgiving: strong overlap and minimal camera translation
+          produced clean correspondences, even in texture-light regions like the lecture screens.
+        </div>
+      </section>
+
+      <section id="part-a2">
+        <h2>Part A.2 · Recover Homographies</h2>
+        <p>
+          Given a set of manually clicked correspondences, we solve for the 3×3 homography matrix that maps points
+          in one image to another. Because the homography is scale-invariant, it contains eight degrees of freedom.
+          Stacking each point pair into the DLT linear system and solving with least squares provides a robust estimate.
+        </p>
+        <blockquote>
+          For each correspondence p → p′, we append two rows to A · h = 0. Enforcing h<sub>33</sub> = 1 breaks the scale
+          ambiguity, and we solve the resulting overdetermined system with SVD.
+        </blockquote>
+
+        <div class="side-by-side">
+          <figure>
+            <img src="part_a2/lecture_1_correspondence.jpg" alt="Correspondence points on the lecture left image" loading="lazy" />
+            <figcaption>Lecture hall (left) with manually labeled correspondences.</figcaption>
+          </figure>
+          <figure>
+            <img src="part_a2/lecture_2_correspondence.jpg" alt="Correspondence points on the lecture middle image" loading="lazy" />
+            <figcaption>Lecture hall (middle) correspondences used to estimate H<sub>left→middle</sub>.</figcaption>
+          </figure>
+          <figure>
+            <img src="part_a2/lecture_2_for_3_correspondence.jpg" alt="Correspondence points on the lecture middle image for the right alignment" loading="lazy" />
+            <figcaption>Shared anchor points that drive the middle to right alignment.</figcaption>
+          </figure>
+        </div>
+
+        <div class="side-by-side">
+          <figure>
+            <img src="part_a2/soda_1_correspondence.jpg" alt="Soda Hall left correspondences" loading="lazy" />
+            <figcaption>Outside Soda (left): features concentrate around high-contrast edges.</figcaption>
+          </figure>
+          <figure>
+            <img src="part_a2/soda_2_correspondence.jpg" alt="Soda Hall middle correspondences" loading="lazy" />
+            <figcaption>Outside Soda (middle): abundant geometric lines simplify alignment.</figcaption>
+          </figure>
+          <figure>
+            <img src="part_a2/soda_2_for_3_correspondence.jpg" alt="Soda Hall middle correspondences for right image" loading="lazy" />
+            <figcaption>Outside Soda (middle for right): second pair of homographies for the right frame.</figcaption>
+          </figure>
+        </div>
+
+        <p>
+          Rectification experiments rely on the same machinery. By mapping selected quadrilaterals in the image to
+          axis-aligned rectangles, we undo perspective distortion—a useful trick showcased in the next section.
+        </p>
+      </section>
+
+      <section id="part-a3">
+        <h2>Part A.3 · Warp the Images</h2>
+        <p>
+          With homographies in hand, I implemented two inverse-warping strategies. Nearest-neighbor simply samples
+          the closest pixel in the source image. Bilinear interpolation, on the other hand, interpolates the four
+          surrounding pixels and smooths the result. Both methods iterate over pixels in the destination frame and
+          map them back into the source via H<sup>−1</sup>.
+        </p>
+
+        <div class="side-by-side">
+          <figure>
+            <img src="IMG_0138.jpg" alt="Original Channing Court photograph" loading="lazy" />
+            <figcaption>Channing Court original shot with strong perspective skew.</figcaption>
+          </figure>
+          <figure>
+            <img src="part_a3/channing_court_nnwarp.jpg" alt="Channing Court rectified with nearest neighbor warping" loading="lazy" />
+            <figcaption>Nearest neighbor warp: straightens lines but introduces stair-step artifacts.</figcaption>
+          </figure>
+          <figure>
+            <img src="part_a3/channing_court_blwarp.jpg" alt="Channing Court rectified with bilinear interpolation" loading="lazy" />
+            <figcaption>Bilinear warp: smoother edges and fewer aliasing artifacts along the cobblestones.</figcaption>
+          </figure>
+        </div>
+
+        <div class="side-by-side">
+          <figure>
+            <img src="IMG_0145.jpg" alt="Original roommates photograph" loading="lazy" />
+            <figcaption>Roommates portrait captured at an angle to demonstrate rectification.</figcaption>
+          </figure>
+          <figure>
+            <img src="part_a3/roomates_nnwarp.jpg" alt="Roommates rectified with nearest neighbor interpolation" loading="lazy" />
+            <figcaption>Nearest neighbor warp: fast but produces jagged transitions.</figcaption>
+          </figure>
+          <figure>
+            <img src="part_a3/roomates_blwarp.jpg" alt="Roommates rectified with bilinear interpolation" loading="lazy" />
+            <figcaption>Bilinear warp: preserves facial features and sharp edges with minimal aliasing.</figcaption>
+          </figure>
+        </div>
+
+        <p>
+          In both cases the bilinear variant noticeably reduces ringing and aliasing. For the final mosaics I default
+          to bilinear interpolation—it balances crispness with smooth gradients, especially in low-texture regions
+          such as skies and whiteboards.
+        </p>
+      </section>
+
+      <section id="part-a4">
+        <h2>Part A.4 · Blend the Images into a Mosaic</h2>
+        <p>
+          After padding each frame with generous black borders, I warp the neighbors into the coordinate system of the
+          anchor image. Each warped image receives a soft mask that ramps from 1 in the center to 0 near the edges.
+          Summing the RGB values weighted by these masks and normalizing by the accumulated weights yields seamless
+          composites without abrupt transitions.
+        </p>
+
+        <div class="gallery">
+          <figure>
+            <img src="part_a4/during_lecture.jpg" alt="Panorama composed from the lecture sequence" loading="lazy" />
+            <figcaption>During Lecture: the three exposures align into a wide view of the classroom.</figcaption>
+          </figure>
+          <figure>
+            <img src="part_a4/outside_soda.jpg" alt="Panorama composed outside Soda Hall" loading="lazy" />
+            <figcaption>Outside Soda: vertical lines stay straight, and trees blend cleanly in the overlap.</figcaption>
+          </figure>
+          <figure>
+            <img src="part_a4/inside_sky.jpg" alt="Panorama composed inside the Sky Lab" loading="lazy" />
+            <figcaption>Inside Sky Lab: interior lighting transitions without visible seams.</figcaption>
+          </figure>
+        </div>
+
+        <p>
+          Ghosting is minimal thanks to steady capture, yet faint seams can appear when moving subjects (people in
+          class, swaying leaves) drift between exposures. A future improvement would be to implement multi-band
+          blending to better hide these residual differences.
+        </p>
+
+        <div class="panel">
+          <h3>Where to go next</h3>
+          <ul>
+            <li>Add automatic feature detection (Harris + ANMS) and RANSAC to remove the manual clicking step.</li>
+            <li>Implement Laplacian pyramid blending to smooth high-frequency mismatches along the seams.</li>
+            <li>Explore cylindrical or spherical warps for ultra-wide panoramas beyond the planar assumption.</li>
+          </ul>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    © Fangzhou · CS180 — Project 3 Auto-Stitching Photo Mosaics
+  </footer>
+</body>
+</html>
