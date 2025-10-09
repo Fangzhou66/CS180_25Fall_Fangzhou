@@ -295,7 +295,7 @@
 
         <div class="callout">
           Careful capture makes the downstream math forgiving: strong overlap and minimal camera translation
-          produced clean correspondences, even in texture-light regions like the lecture screens.
+          produced clean correspondences, even across repetitive textures like lockers or glass facades.
         </div>
       </section>
 
@@ -303,48 +303,52 @@
         <h2>Part A.2 · Recover Homographies</h2>
         <p>
           Given a set of manually clicked correspondences, we solve for the 3×3 homography matrix that maps points
-          in one image to another. Because the homography is scale-invariant, it contains eight degrees of freedom.
-          Stacking each point pair into the DLT linear system and solving with least squares provides a robust estimate.
+          in one image to another. Because the homography is scale-invariant, it contains eight degrees of freedom,
+          so we need at least four non-collinear pairs. I normalize point coordinates, stack the equations from each
+          correspondence into a design matrix, and then solve the resulting least-squares problem with SVD.
         </p>
-        <blockquote>
-          For each correspondence p → p′, we append two rows to A · h = 0. Enforcing h<sub>33</sub> = 1 breaks the scale
-          ambiguity, and we solve the resulting overdetermined system with SVD.
-        </blockquote>
 
-        <div class="side-by-side">
-          <figure>
-            <img src="part_a2/lecture_1_correspondence.jpg" alt="Correspondence points on the lecture left image" loading="lazy" />
-            <figcaption>Lecture hall (left) with manually labeled correspondences.</figcaption>
-          </figure>
-          <figure>
-            <img src="part_a2/lecture_2_correspondence.jpg" alt="Correspondence points on the lecture middle image" loading="lazy" />
-            <figcaption>Lecture hall (middle) correspondences used to estimate H<sub>left→middle</sub>.</figcaption>
-          </figure>
-          <figure>
-            <img src="part_a2/lecture_2_for_3_correspondence.jpg" alt="Correspondence points on the lecture middle image for the right alignment" loading="lazy" />
-            <figcaption>Shared anchor points that drive the middle to right alignment.</figcaption>
-          </figure>
+        <div class="panel">
+          <strong>DLT formulation</strong>
+          <p>
+            For each correspondence (x, y) -> (x', y') we append two rows to the system A * h = 0:
+          </p>
+          <pre><code>
+[ -x  -y  -1   0   0   0   x'*x   x'*y   x' ]
+[  0   0   0  -x  -y  -1   y'*x   y'*y   y' ]
+          </code></pre>
+          <p>
+            Setting h33 = 1 removes the scale ambiguity. Solving the overdetermined system with SVD yields the
+            homography that best aligns the point pairs in the least-squares sense.
+          </p>
         </div>
 
         <div class="side-by-side">
           <figure>
-            <img src="part_a2/soda_1_correspondence.jpg" alt="Soda Hall left correspondences" loading="lazy" />
-            <figcaption>Outside Soda (left): features concentrate around high-contrast edges.</figcaption>
+            <img src="part_a2/desk_1_correspondence.jpg" alt="Desk scene correspondences for the first frame" loading="lazy" />
+            <figcaption>Desk (left): points emphasize corners on the monitor, keyboard, and desk edges.</figcaption>
           </figure>
           <figure>
-            <img src="part_a2/soda_2_correspondence.jpg" alt="Soda Hall middle correspondences" loading="lazy" />
-            <figcaption>Outside Soda (middle): abundant geometric lines simplify alignment.</figcaption>
-          </figure>
-          <figure>
-            <img src="part_a2/soda_2_for_3_correspondence.jpg" alt="Soda Hall middle correspondences for right image" loading="lazy" />
-            <figcaption>Outside Soda (middle for right): second pair of homographies for the right frame.</figcaption>
+            <img src="part_a2/desk_2_correspondence.jpg" alt="Desk scene correspondences for the second frame" loading="lazy" />
+            <figcaption>Desk (right): matching features across the two viewpoints define the homography.</figcaption>
           </figure>
         </div>
 
-        <p>
-          Rectification experiments rely on the same machinery. By mapping selected quadrilaterals in the image to
-          axis-aligned rectangles, we undo perspective distortion—a useful trick showcased in the next section.
-        </p>
+        <div class="panel">
+          <strong>Recovered homography</strong>
+          <p>
+            The left-to-right desk alignment produces the following homography (scaled so h33 = 1):
+          </p>
+          <pre><code>
+[ 1.98737628  -0.04391823  -4121.45364 ]
+[ 0.29124797   1.63357928  -1138.49450 ]
+[ 0.00015967   0.00000286     1.00000000 ]
+          </code></pre>
+          <p>
+            The off-diagonal entries capture the planar rotation/shear between the two photos, while the translation
+            column accounts for the shift created as the camera pivots around the desk setup.
+          </p>
+        </div>
       </section>
 
       <section id="part-a3">
