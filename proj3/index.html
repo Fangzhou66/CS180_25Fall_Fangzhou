@@ -429,18 +429,26 @@
       <section id="part-b1">
         <h2>Part B.1 · Harris Corner Detection</h2>
         <p>
-          In this section, I use the Harris corner detection algorithm to detect the corners of the images. However,
-          naively choosing the strongest corners will lead to a uneven distribution of the features. Therefore, I
-          applied Adaptive Non-Maximal Suppression (ANMS) to choose the corners. The following images are the results
-          of the Harris corner detection and the Adaptive Non-Maximal Suppression.
+          I start by running a Harris detector implemented with <code>skimage.feature.corner_harris</code> (sigma = 1),
+          which produces a dense response map over the grayscale image. Peaks are harvested by <code>peak_local_max</code>
+          with a 10-pixel exclusion radius, and I discard anything within 20 pixels of the border so later warps do not
+          rely on unstable edge measurements. The result is a few thousand well-spaced candidates whose score reflects
+          how corner-like each location is.
+        </p>
+        <p>
+          To avoid cramming all features around the brightest monitors, I apply Adaptive Non-Maximal Suppression (ANMS).
+          Candidates are sorted by their Harris response and, for each point, I record the minimum Euclidean distance to
+          any stronger point whose response is at least 90% as large. This distance becomes the suppression radius; taking
+          the 500 points with the largest radii yields a set of corners that blanket the scene evenly, which is crucial
+          for the descriptor and matching stages that follow.
         </p>
         <div class="panel">
           <strong>ANMS implementation</strong>
           <ol>
-            <li>Detect the corners of the image using the Harris corner detection algorithm and sort the corners by the Harris response score.</li>
-            <li>Maintain a list of already selected corners, initialized as empty.</li>
-            <li>For the i-th corner, calculate the minimum distance to the already selected corners with a response score threshold of 0.9.</li>
-            <li>Sort the corners by the minimum distance and select the top k corners.</li>
+            <li>Compute the Harris response map with <code>corner_harris(..., sigma=1)</code>, pick local maxima using <code>peak_local_max</code>, and remove detections within 20 pixels of the image border.</li>
+            <li>Sort the surviving candidates by their Harris strength from strongest to weakest before evaluating ANMS.</li>
+            <li>For each candidate, measure the smallest distance to a previously processed stronger corner whose response is at least 0.9× the current response; store this value as the suppression radius.</li>
+            <li>Rank candidates by suppression radius and keep the top <em>k</em> = 500 so the remaining corners stay spatially diffuse.</li>
           </ol>
         </div>
         <div class="gallery">
@@ -526,6 +534,7 @@
         <div class="gallery">
           <figure>
             <img src="part_b4/during_lecture_auto.jpg" alt="Inside Sky Lab whiteboard scene stitched manually" loading="lazy" />
+            <figcaption>Amazon Hub Locker in Student Center</figcaption>
           </figure>
           <figure>
             <img src="part_b4/outside_sky_auto.jpg" alt="Outside Soda panorama stitched with RANSAC" loading="lazy" />
