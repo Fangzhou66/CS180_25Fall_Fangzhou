@@ -206,6 +206,9 @@
         <a href="#part-a2">Part A.2 · Homographies <span>solving for planar projections</span></a>
         <a href="#part-a3">Part A.3 · Warping <span>nearest vs. bilinear interpolation</span></a>
         <a href="#part-a4">Part A.4 · Mosaics <span>masking, blending, takeaways</span></a>
+        <a href="#part-b2">Part B.2 · Descriptors <span>compact patch embeddings</span></a>
+        <a href="#part-b3">Part B.3 · Matching <span>ratio test correspondences</span></a>
+        <a href="#part-b4">Part B.4 · RANSAC <span>robust homography estimation</span></a>
       </nav>
     </div>
   </header>
@@ -422,6 +425,103 @@
         </p>
 
       </section>
+      
+      <section id="part-b2">
+        <h2>Part B.2 · Feature Descriptor Extraction</h2>
+        <p>
+          This stage implements the feature descriptor extraction. For every detected interest point, I crop a 40 × 40
+          window in the original image, blur it slightly, and downsample to an 8 × 8 patch that becomes the descriptor.
+          The compact representation is easy to compare while still encoding the local intensity structure.
+        </p>
+        <p>
+          All descriptors remain axis-aligned because the Inside Sky Lab captures do not involve any significant
+          in-plane rotation. Below are three sample descriptors pulled from the Inside Sky Lab left image—each retains
+          enough contrast to make matching reliable even after normalization.
+        </p>
+        <div class="gallery">
+          <figure>
+            <img src="part_b2/lecture_1_descriptor_patch_0.png" alt="Inside Sky Lab descriptor patch example 1" loading="lazy" />
+            <figcaption>Inside Sky Lab descriptor example · bright monitor bezel beside a dark whiteboard marker tray.</figcaption>
+          </figure>
+          <figure>
+            <img src="part_b2/lecture_1_descriptor_patch_1.png" alt="Inside Sky Lab descriptor patch example 2" loading="lazy" />
+            <figcaption>Inside Sky Lab descriptor example · smooth gradient across the lab wall and workspace.</figcaption>
+          </figure>
+          <figure>
+            <img src="part_b2/lecture_1_descriptor_patch_2.png" alt="Inside Sky Lab descriptor patch example 3" loading="lazy" />
+            <figcaption>Inside Sky Lab descriptor example · high-frequency structure from the equipment shelving.</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="part-b3">
+        <h2>Part B.3 · Feature Matching</h2>
+        <p>
+          The matching stage sweeps through every descriptor in the Inside Sky Lab reference image, measures SSD error
+          against descriptors in the second view, and tracks both the best and second-best candidates. Retaining a match
+          only when the ratio of the two errors is below 0.7 enforces Lowe's ratio test and filters out ambiguous
+          correspondences along repeated textures.
+        </p>
+        <figure>
+          <img src="part_b3/lecture_1_2_matches.png" alt="Inside Sky Lab descriptor matches after the 0.7 ratio test" loading="lazy" />
+          <figcaption>Inside Sky Lab matches · green lines show the inliers that pass the ratio test and survive to RANSAC.</figcaption>
+        </figure>
+      </section>
+
+      <section id="part-b4">
+        <h2>Part B.4 · RANSAC for Robust Homography</h2>
+        <p>
+          RANSAC repeatedly samples minimal sets of correspondences, estimates candidate homographies, and measures
+          agreement across all matches. By focusing on the hypothesis with the highest inlier count, the algorithm
+          resists outliers from mismatched descriptors and produces a stable warp for the panorama.
+        </p>
+        <div class="panel">
+          <strong>RANSAC loop</strong>
+          <ol>
+            <li>Randomly sample four matches from the ratio-test survivors.</li>
+            <li>Estimate a homography via DLT and normalize so h<sub>33</sub> = 1.</li>
+            <li>Project all points, compute their reprojection errors, and count inliers.</li>
+            <li>Repeat for a fixed number of iterations to cover multiple hypotheses.</li>
+            <li>Re-fit the homography using every inlier from the best hypothesis and return it.</li>
+          </ol>
+        </div>
+        <p>
+          The auto-stitched mosaics below compare the manual correspondences from Part A with the fully automatic
+          pipeline. RANSAC removes spurious matches and keeps the alignment sharp across lab interiors and outdoor
+          scenes alike.
+        </p>
+        <div class="side-by-side">
+          <figure>
+            <img src="part_a4/during_lecture.jpg" alt="Inside Sky Lab whiteboard scene stitched manually" loading="lazy" />
+            <figcaption>Inside Sky Lab (Whiteboard) · stitched from manually selected correspondences.</figcaption>
+          </figure>
+          <figure>
+            <img src="part_b4/during_lecture_auto.jpg" alt="Inside Sky Lab whiteboard scene stitched with RANSAC" loading="lazy" />
+            <figcaption>Inside Sky Lab (Whiteboard) · stitched automatically with descriptor matching and RANSAC.</figcaption>
+          </figure>
+        </div>
+        <div class="side-by-side">
+          <figure>
+            <img src="part_a4/outside_soda.jpg" alt="Outside Soda panorama stitched manually" loading="lazy" />
+            <figcaption>Outside Soda · manual homography still produces a clean corridor alignment.</figcaption>
+          </figure>
+          <figure>
+            <img src="part_b4/outside_sky_auto.jpg" alt="Outside Soda panorama stitched with RANSAC" loading="lazy" />
+            <figcaption>Outside Soda · automatic pipeline lands the same overlap without extra ghosting.</figcaption>
+          </figure>
+        </div>
+        <div class="side-by-side">
+          <figure>
+            <img src="part_a4/inside_sky.jpg" alt="Inside Sky Lab atrium stitched manually" loading="lazy" />
+            <figcaption>Inside Sky Lab (Atrium) · manual correspondences align the lab benches and pillars.</figcaption>
+          </figure>
+          <figure>
+            <img src="part_b4/inside_sky_auto.jpg" alt="Inside Sky Lab atrium stitched with RANSAC" loading="lazy" />
+            <figcaption>Inside Sky Lab (Atrium) · automatic RANSAC result closely matches the manual alignment.</figcaption>
+          </figure>
+        </div>
+      </section>
+
     </div>
   </main>
 
