@@ -206,13 +206,45 @@
         <a href="#part-a2">Part A.2 · Homographies <span>solving for planar projections</span></a>
         <a href="#part-a3">Part A.3 · Warping <span>nearest vs. bilinear interpolation</span></a>
         <a href="#part-a4">Part A.4 · Mosaics <span>masking, blending, takeaways</span></a>
+        <a href="#part-b1">Part B.1 · Corners <span>Harris + ANMS detection</span></a>
         <a href="#part-b2">Part B.2 · Descriptors <span>compact patch embeddings</span></a>
         <a href="#part-b3">Part B.3 · Matching <span>ratio test correspondences</span></a>
         <a href="#part-b4">Part B.4 · RANSAC <span>robust homography estimation</span></a>
       </nav>
     </div>
   </header>
-
+      <section id="part-b1">
+        <h2>Part B.1 · Harris Corner Detection</h2>
+        <p>
+          In this section, I use the Harris corner detection algorithm to detect the corners of the images. However,
+          naively choosing the strongest corners will lead to a uneven distribution of the features. Therefore, I
+          applied Adaptive Non-Maximal Suppression (ANMS) to choose the corners. The following images are the results
+          of the Harris corner detection and the Adaptive Non-Maximal Suppression.
+        </p>
+        <div class="panel">
+          <strong>ANMS implementation</strong>
+          <ol>
+            <li>Detect the corners of the image using the Harris corner detection algorithm and sort the corners by the Harris response score.</li>
+            <li>Maintain a list of already selected corners, initialized as empty.</li>
+            <li>For the i-th corner, calculate the minimum distance to the already selected corners with a response score threshold of 0.9.</li>
+            <li>Sort the corners by the minimum distance and select the top k corners.</li>
+          </ol>
+        </div>
+        <div class="gallery">
+          <figure>
+            <img src="part_b1/lecture_1_harris_corners.png" alt="Inside Sky Lab Harris corner heatmap" loading="lazy" />
+            <figcaption>Inside Sky Lab · raw Harris corner responses before suppression.</figcaption>
+          </figure>
+          <figure>
+            <img src="part_b1/lecture_1_strongest_500_harris_corners.png" alt="Inside Sky Lab strongest Harris corners" loading="lazy" />
+            <figcaption>Inside Sky Lab · naively picking the 500 strongest responses clusters around the monitors.</figcaption>
+          </figure>
+          <figure>
+            <img src="part_b1/lecture_1_ANMS_500_harris_corners.png" alt="Inside Sky Lab ANMS filtered corners" loading="lazy" />
+            <figcaption>Inside Sky Lab · ANMS spreads 500 corners evenly across the lab interior.</figcaption>
+          </figure>
+        </div>
+      </section>
   <main>
     <div class="container">
       <section id="overview">
