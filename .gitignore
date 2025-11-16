@@ -1,0 +1,5 @@
+# Ignore project 1–3 data/code directories
+cs180 proj1 data/
+proj2/
+proj3/
+
