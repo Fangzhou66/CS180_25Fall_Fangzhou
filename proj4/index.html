@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Project 4 · Neural Radiance Fields</title>
+  <meta name="description" content="CS180 Project 4 report — Neural radiance fields for 2D image fitting and multi-view 3D reconstruction." />
+  <meta name="robots" content="noindex" />
+  <style>
+    :root {
+      --fg: #0b1120;
+      --muted: #475569;
+      --accent: #2563eb;
+      --bg: #ffffff;
+      --panel: #f8fafc;
+      --border: #e2e8f0;
+      --radius: 14px;
+      --shadow: 0 12px 36px rgba(15, 23, 42, 0.08);
+      --max-width: 1024px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--fg);
+      background: var(--bg);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+    header {
+      background: linear-gradient(160deg, #e0e7ff 0%, #ffffff 60%);
+      border-bottom: 1px solid var(--border);
+      padding: 48px 20px 56px;
+    }
+    .container {
+      width: 100%;
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    h1 {
+      font-size: clamp(32px, 5vw, 44px);
+      margin: 0 0 12px;
+      letter-spacing: -0.02em;
+    }
+    h2 {
+      font-size: clamp(24px, 4vw, 30px);
+      margin: 48px 0 12px;
+      letter-spacing: -0.01em;
+    }
+    h3 {
+      font-size: 18px;
+      margin: 20px 0 8px;
+      color: #111827;
+    }
+    p {
+      color: var(--muted);
+      margin: 12px 0;
+    }
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .lead {
+      max-width: 680px;
+      font-size: 18px;
+      color: #1f2937;
+      margin-top: 12px;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin: 28px 0;
+      box-shadow: var(--shadow);
+    }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+    .meta-card {
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: rgba(37, 99, 235, 0.08);
+      color: #1d4ed8;
+      font-weight: 500;
+    }
+    .toc {
+      margin-top: 32px;
+      display: grid;
+      gap: 8px;
+      max-width: 420px;
+    }
+    .toc a {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: var(--fg);
+      font-weight: 500;
+      transition: transform 120ms ease, box-shadow 120ms ease;
+    }
+    .toc a span {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 400;
+    }
+    .toc a:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.1);
+    }
+    main {
+      padding: 48px 0 80px;
+    }
+    section + section {
+      margin-top: 28px;
+    }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+      margin: 20px 0 8px;
+    }
+    figure {
+      margin: 0;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+    }
+    figure img {
+      width: 100%;
+      display: block;
+    }
+    figcaption {
+      padding: 14px 16px 16px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px;
+      background: repeating-linear-gradient(
+        45deg,
+        #e5e7eb,
+        #e5e7eb 10px,
+        #f9fafb 10px,
+        #f9fafb 20px
+      );
+      color: #4b5563;
+      font-size: 14px;
+      text-align: center;
+    }
+    .side-by-side {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+      margin: 24px 0;
+    }
+    .callout {
+      border-left: 4px solid var(--accent);
+      padding: 16px 22px;
+      background: rgba(37, 99, 235, 0.05);
+      border-radius: 12px;
+      color: #1e3a8a;
+      font-size: 15px;
+    }
+    ul {
+      margin: 16px 0;
+      padding-left: 20px;
+      color: var(--muted);
+    }
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 28px 20px 36px;
+      background: #f8fafc;
+      color: var(--muted);
+      text-align: center;
+      font-size: 14px;
+    }
+    @media (max-width: 640px) {
+      header { padding: 40px 20px 48px; }
+      .panel { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>Project 4: Neural Radiance Fields</h1>
+      <p class="lead">
+        In this project I move from classic image processing to neural fields, first fitting a 2D neural field to a single image and then training a full NeRF model for multi-view 3D reconstruction and novel view synthesis.
+      </p>
+      <div class="meta-grid">
+        <div class="meta-card">CS180 · Fall 2025</div>
+        <div class="meta-card">Author · Fangzhou</div>
+        <div class="meta-card">Tools · PyTorch · NumPy · Viser</div>
+      </div>
+      <nav class="toc">
+        <a href="#part0"><span>Part 0</span> Camera calibration &amp; capture</a>
+        <a href="#part1"><span>Part 1</span> 2D neural field fitting</a>
+        <a href="#part2"><span>Part 2</span> NeRF from multi-view images</a>
+        <a href="#part26"><span>Part 2.6</span> Training on my own data</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <section id="part0">
+        <h2>Part 0: Calibrating the Camera and Capturing a 3D Scan</h2>
+        <p>
+          This part calibrates the camera, captures the images for the object, and undistorts them for later reconstruction.
+          I estimate intrinsic parameters, undistort the raw captures, and then visualize the recovered camera poses using Viser.
+        </p>
+        <p>
+          The following visualizations show the cloud of cameras and the difference between the original and undistorted images.
+        </p>
+
+        <div class="gallery">
+          <figure>
+            <div class="placeholder">Placeholder — Original Selfie</div>
+            <figcaption>Original selfie used in the calibration and reconstruction pipeline.</figcaption>
+          </figure>
+          <figure>
+            <div class="placeholder">Placeholder — Image 1 for the captured dataset</div>
+            <figcaption>Image 1 from the captured dataset of the object.</figcaption>
+          </figure>
+          <figure>
+            <div class="placeholder">Placeholder — Box filter result</div>
+            <figcaption>Box filter result visualizing the effect of undistortion.</figcaption>
+          </figure>
+          <figure>
+            <div class="placeholder">Placeholder — Image 2 for the captured dataset</div>
+            <figcaption>Image 2 from the captured dataset of the object.</figcaption>
+          </figure>
+        </div>
+
+        <div class="side-by-side">
+          <figure>
+            <div class="placeholder">Placeholder — Original image</div>
+            <figcaption>Original selfie before undistortion.</figcaption>
+          </figure>
+          <figure>
+            <div class="placeholder">Placeholder — Comparison between original and undistorted</div>
+            <figcaption>Comparison between the original and undistorted images.</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="part1">
+        <h2>Part 1: Fitting a Neural Field to a 2D Image</h2>
+        <p>
+          To get started, I first fit a neural field to a single 2D image. Pixel coordinates are mapped into a
+          higher-dimensional space using positional embeddings and then passed through a small MLP that predicts RGB values.
+        </p>
+        <p>
+          The MLP is constructed with four linear layers interleaved with ReLU activations, followed by a sigmoid on
+          the output layer to keep RGB values in a valid range. I train with Adam using a learning rate of 0.01 and
+          experiment with different positional encoding frequencies and hidden dimensions to see how they affect reconstruction quality.
+        </p>
+        <div class="panel">
+          <h3>Architecture and training details</h3>
+          <ul>
+            <li>Inputs are 2D coordinates, transformed with sinusoidal positional embeddings.</li>
+            <li>The network uses 4 fully-connected layers with ReLU, followed by a sigmoid output layer.</li>
+            <li>Adam optimizer with learning rate 0.01 is used to minimize mean squared error between predicted and ground-truth RGB.</li>
+            <li>I vary both embedding frequencies and hidden layer width to study reconstruction fidelity and overfitting.</li>
+          </ul>
+        </div>
+
+        <p>
+          During training, I periodically save checkpoints and render the intermediate reconstructions. I also track
+          PSNR to quantify how well the neural field matches the target image.
+        </p>
+
+        <div class="gallery">
+          <figure>
+            <div class="placeholder">Placeholder — Homography matrix visualization</div>
+            <figcaption>Homography matrix or coordinate transform used when relating pixel coordinates to the neural field.</figcaption>
+          </figure>
+          <figure>
+            <div class="placeholder">Placeholder — 2D image reconstruction</div>
+            <figcaption>Reconstruction of the 2D image at a training checkpoint.</figcaption>
+          </figure>
+          <figure>
+            <div class="placeholder">Placeholder — Homography matrix (alternate)</div>
+            <figcaption>Alternate view of the homography matrix used in experiments.</figcaption>
+          </figure>
+          <figure>
+            <div class="placeholder">Placeholder — Training PSNR curve</div>
+            <figcaption>Training PSNR curve showing convergence over time.</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="part2">
+        <h2>Part 2: Fitting a Neural Radiance Field from Multi-view Images</h2>
+        <p>
+          In this part I generalize the neural field to a full Neural Radiance Field (NeRF) using multi-view images.
+          I implement ray geometry, sampling strategies, a NeRF architecture, and differentiable volume rendering.
+        </p>
+
+        <h3>Part 2.1 — Ray geometry: <code>transform</code>, <code>pixel_to_camera</code>, <code>pixel_to_ray</code></h3>
+        <p>
+          I implement three core batched geometric functions:
+        </p>
+        <ul>
+          <li><code>transform</code> performs batched matrix–vector multiplication in homogeneous coordinates and returns 3D coordinates.</li>
+          <li><code>pixel_to_camera</code> converts pixel coordinates into camera coordinates; because pixels correspond to rays, I include a scale parameter to fix a point along each ray.</li>
+          <li><code>pixel_to_ray</code> uses the camera intrinsics and extrinsics to generate ray origins and directions for each pixel.</li>
+        </ul>
+
+        <h3>Part 2.2 — Sampling points along rays</h3>
+        <p>
+          For the <code>sample_ray_from_images</code> function, I first sample pixels from the images and then call
+          <code>pixel_to_ray</code> to obtain the corresponding rays. Along each ray, I uniformly sample
+          <code>num_samples</code> points between <code>near</code> and <code>far</code>, with optional random
+          perturbation to enable stratified sampling.
+        </p>
+
+        <h3>Part 2.3 — RayDataset and visualizing rays with Viser</h3>
+        <p>
+          I wrap the ray sampling logic into a <code>RayDataset</code> that produces mini-batches of rays for training.
+          To debug and build intuition, I visualize rays from the bulldozer scene using Viser.
+        </p>
+
+        <div class="gallery">
+          <figure>
+            <div class="placeholder">Placeholder — channing_court</div>
+            <figcaption>Ray visualization from a single image in the Channing Court scene.</figcaption>
+          </figure>
+          <figure>
+            <div class="placeholder">Placeholder — Ray visualization from a single image</div>
+            <figcaption>Rays emitted from one camera pose, colored by origin or direction.</figcaption>
+          </figure>
+          <figure>
+            <div class="placeholder">Placeholder — channing_court_nearest_neighbor</div>
+            <figcaption>Nearest-neighbor visualization for channing_court rays.</figcaption>
+          </figure>
+          <figure>
+            <div class="placeholder">Placeholder — 100 rays sampled from all images</div>
+            <figcaption>100 rays sampled from all input images, showing coverage across the scene.</figcaption>
+          </figure>
+        </div>
+
+        <h3>Part 2.4 — NeRF model architecture</h3>
+        <p>
+          The NeRF network takes in 3D coordinates and view directions, encodes them with positional embeddings, and
+          predicts volume density and RGB color for each 3D point along a ray.
+        </p>
+        <div class="panel">
+          <h3>Model design</h3>
+          <ul>
+            <li>Positional embeddings for both 3D positions and viewing directions.</li>
+            <li>Multi-layer perceptron with skip connections to preserve low-frequency information.</li>
+            <li>Separate heads for density and color prediction.</li>
+          </ul>
+        </div>
+
+        <div class="gallery">
+          <figure>
+            <div class="placeholder">Placeholder — roomates</div>
+            <figcaption>Diagram of the NeRF model architecture.</figcaption>
+          </figure>
+        </div>
+
+        <h3>Part 2.5 — Volume rendering and bulldozer reconstruction</h3>
+        <p>
+          I implement the volume rendering function that composites predictions along each ray. Given per-sample RGB
+          values and densities, it outputs a single reconstructed pixel.
+        </p>
+        <p>
+          I use the cumulative product trick in PyTorch to efficiently compute transmittance <code>T_i</code> values,
+          which significantly speeds up rendering compared to a naïve loop.
+        </p>
+
+        <div class="gallery">
+          <figure>
+            <div class="placeholder">Placeholder — Training progression</div>
+            <figcaption>Training progression of the NeRF on the bulldozer dataset.</figcaption>
+          </figure>
+          <figure>
+            <div class="placeholder">Placeholder — PSNR values on validation set</div>
+            <figcaption>PSNR values evaluated on the validation set over training.</figcaption>
+          </figure>
+          <figure>
+            <div class="placeholder">Placeholder — Reconstruction of the bulldozer</div>
+            <figcaption>Final 3D reconstruction of the bulldozer with novel view rendering.</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="part26">
+        <h2>Part 2.6: Training with My Own Data</h2>
+        <p>
+          In the final part I train a NeRF model on my own dataset captured with an iPhone 13. The model architecture
+          is kept the same as in Part 2.4; I only adjust the <code>near</code> and <code>far</code> bounds used when
+          sampling along rays to better match the scale of the scene.
+        </p>
+        <p>
+          The reconstruction quality is relatively low because some views hide important parts of the scene. The
+          markers (tags) are occluded from certain directions, so the model never sees consistent supervision for those regions.
+        </p>
+
+        <div class="gallery">
+          <figure>
+            <div class="placeholder">Placeholder — Original Selfie</div>
+            <figcaption>Original selfie from my own capture sequence.</figcaption>
+          </figure>
+          <figure>
+            <div class="placeholder">Placeholder — Training progression for my NeRF data</div>
+            <figcaption>Training progression for my personal NeRF dataset.</figcaption>
+          </figure>
+          <figure>
+            <div class="placeholder">Placeholder — warped_lec_1 (training loss)</div>
+            <figcaption>Training loss curve over iterations.</figcaption>
+          </figure>
+          <figure>
+            <div class="placeholder">Placeholder — mask_lec_1 (training PSNR)</div>
+            <figcaption>PSNR curve for the personal dataset.</figcaption>
+          </figure>
+          <figure>
+            <div class="placeholder">Placeholder — warped_lec_3 (reconstruction of my data)</div>
+            <figcaption>Final reconstruction of my own scene from novel viewpoints.</figcaption>
+          </figure>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">© Fangzhou — CS180 Project 4 (for course submission/testing)</div>
+  </footer>
+</body>
+</html>
+
