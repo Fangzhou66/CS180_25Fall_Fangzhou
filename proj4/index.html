@@ -153,6 +153,13 @@
     .gallery .wide {
       grid-column: 1 / -1;
     }
+    .gallery-small {
+      justify-items: center;
+    }
+    .gallery-small figure {
+      max-width: 480px;
+      width: 100%;
+    }
     .placeholder {
       display: flex;
       align-items: center;
@@ -363,11 +370,13 @@
             <figcaption>Training progression, validation PSNR curve, and final 3D bulldozer reconstruction visualized in a single grid.</figcaption>
           </figure>
         </div>
-        <div class="gallery gallery-two">
-          <figure>
+        <div class="gallery">
+          <figure class="wide">
             <img src="nerf_psnr_curve.png" alt="PSNR values evaluated on the validation set" loading="lazy" />
             <figcaption>PSNR values evaluated on the validation set.</figcaption>
           </figure>
+        </div>
+        <div class="gallery gallery-small">
           <figure>
             <img src="bulldozer.gif" alt="Reconstruction of the bulldozer" loading="lazy" />
             <figcaption>Reconstruction of the bulldozer.</figcaption>
@@ -404,8 +413,8 @@
             <figcaption>PSNR curve for the personal dataset.</figcaption>
           </figure>
         </div>
-        <div class="gallery">
-          <figure class="wide">
+        <div class="gallery gallery-small">
+          <figure>
             <img src="lafufu.gif" alt="Reconstruction of my own data" loading="lazy" />
             <figcaption>Final reconstruction of my own scene from novel viewpoints.</figcaption>
           </figure>
