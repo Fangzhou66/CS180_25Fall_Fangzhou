@@ -220,13 +220,12 @@
   <main>
     <div class="container">
       <section id="part0">
-        <h2>Part 0: Calibrating the Camera and Capturing a 3D Scan</h2>
+        <h2>Part 0: Calibrating Your Camera and Capturing a 3D Scan</h2>
         <p>
-          This part calibrates the camera, captures the images for the object, and undistorts them for later reconstruction.
-          I estimate intrinsic parameters, undistort the raw captures, and then visualize the recovered camera poses using Viser.
+          In Part 0 I set up the data acquisition pipeline that the rest of the project depends on. I estimate the intrinsic parameters of my phone camera, take a sequence of photos of the object while moving around it, and correct lens distortion so that the images better match an ideal pinhole camera model.
         </p>
         <p>
-          The following visualizations show the cloud of cameras and the difference between the original and undistorted images.
+          The figures below include a Viser visualization of the recovered camera poses as well as side‑by‑side comparisons of raw distorted frames and their undistorted versions, highlighting how calibration changes the geometry of the images.
         </p>
 
         <div class="gallery">
@@ -261,15 +260,12 @@
       </section>
 
       <section id="part1">
-        <h2>Part 1: Fitting a Neural Field to a 2D Image</h2>
+        <h2>Part 1: Fit a Neural Field to a 2D Image</h2>
         <p>
-          To get started, I first fit a neural field to a single 2D image. Pixel coordinates are mapped into a
-          higher-dimensional space using positional embeddings and then passed through a small MLP that predicts RGB values.
+          As a warm‑up to full NeRFs, I train a coordinate‑based neural network that memorizes a single image. Each pixel location is treated as a continuous 2D coordinate, which I encode with sinusoidal positional features before feeding into a small MLP that outputs RGB values.
         </p>
         <p>
-          The MLP is constructed with four linear layers interleaved with ReLU activations, followed by a sigmoid on
-          the output layer to keep RGB values in a valid range. I train with Adam using a learning rate of 0.01 and
-          experiment with different positional encoding frequencies and hidden dimensions to see how they affect reconstruction quality.
+          The network consists of four fully connected layers with ReLU activations and a final sigmoid to keep colors in \[0, 1]. I optimize the parameters with Adam (learning rate 0.01) and sweep over both the number of positional encoding frequencies and the hidden layer width to see how model capacity and high‑frequency encoding influence reconstruction quality.
         </p>
         <div class="panel">
           <h3>Architecture and training details</h3>
@@ -282,8 +278,7 @@
         </div>
 
         <p>
-          During training, I periodically save checkpoints and render the intermediate reconstructions. I also track
-          PSNR to quantify how well the neural field matches the target image.
+          During training I periodically snapshot the model, render its current reconstruction, and log PSNR so I can watch the neural field gradually sharpen from a blurry guess into a high‑fidelity copy of the target image.
         </p>
 
         <div class="gallery">
@@ -307,34 +302,29 @@
       </section>
 
       <section id="part2">
-        <h2>Part 2: Fitting a Neural Radiance Field from Multi-view Images</h2>
+        <h2>Part 2: Fit a Neural Radiance Field from Multi-view Images</h2>
         <p>
-          In this part I generalize the neural field to a full Neural Radiance Field (NeRF) using multi-view images.
-          I implement ray geometry, sampling strategies, a NeRF architecture, and differentiable volume rendering.
+          In Part 2 I move from fitting a single image to learning a full 3D radiance field. Using a set of posed photographs, I build the geometry and rendering machinery needed for NeRF: turning pixels into rays, sampling 3D points along those rays, querying a neural network for color and density, and integrating the result along each ray to render novel views.
         </p>
 
         <h3>Part 2.1 — Ray geometry: <code>transform</code>, <code>pixel_to_camera</code>, <code>pixel_to_ray</code></h3>
         <p>
-          I implement three core batched geometric functions:
+          I start by implementing three core batched geometry routines: <code>transform</code>, <code>pixel_to_camera</code>, and <code>pixel_to_ray</code>. Together they connect 2D pixel coordinates to 3D rays in world space.
         </p>
         <ul>
-          <li><code>transform</code> performs batched matrix–vector multiplication in homogeneous coordinates and returns 3D coordinates.</li>
-          <li><code>pixel_to_camera</code> converts pixel coordinates into camera coordinates; because pixels correspond to rays, I include a scale parameter to fix a point along each ray.</li>
-          <li><code>pixel_to_ray</code> uses the camera intrinsics and extrinsics to generate ray origins and directions for each pixel.</li>
+          <li><code>transform</code> applies a homogeneous 4×4 transform to a batch of points and then drops back to 3D coordinates.</li>
+          <li><code>pixel_to_camera</code> maps pixel locations into the camera coordinate frame; since a pixel corresponds to an entire ray, I introduce a scale parameter to choose a specific point along that ray.</li>
+          <li><code>pixel_to_ray</code> combines intrinsics and extrinsics to produce ray origins and directions that NeRF will later sample along.</li>
         </ul>
 
         <h3>Part 2.2 — Sampling points along rays</h3>
         <p>
-          For the <code>sample_ray_from_images</code> function, I first sample pixels from the images and then call
-          <code>pixel_to_ray</code> to obtain the corresponding rays. Along each ray, I uniformly sample
-          <code>num_samples</code> points between <code>near</code> and <code>far</code>, with optional random
-          perturbation to enable stratified sampling.
+          Next I design the sampling strategy. In <code>sample_ray_from_images</code> I randomly pick pixels from the training images, convert them to rays with <code>pixel_to_ray</code>, and then place <code>num_samples</code> points along each ray between <code>near</code> and <code>far</code>. I optionally jitter the samples within their intervals to implement stratified sampling and reduce aliasing.
         </p>
 
         <h3>Part 2.3 — RayDataset and visualizing rays with Viser</h3>
         <p>
-          I wrap the ray sampling logic into a <code>RayDataset</code> that produces mini-batches of rays for training.
-          To debug and build intuition, I visualize rays from the bulldozer scene using Viser.
+          I encapsulate this logic in a <code>RayDataset</code> that yields mini‑batches of rays and sample points for training. To sanity‑check the implementation and build geometric intuition, I visualize subsets of rays from the bulldozer scene in Viser.
         </p>
 
         <div class="gallery">
@@ -358,15 +348,14 @@
 
         <h3>Part 2.4 — NeRF model architecture</h3>
         <p>
-          The NeRF network takes in 3D coordinates and view directions, encodes them with positional embeddings, and
-          predicts volume density and RGB color for each 3D point along a ray.
+          The NeRF network itself takes as input 3D positions together with viewing directions, encodes them with positional embeddings, and predicts both volume density and emitted color at each sampled point.
         </p>
         <div class="panel">
           <h3>Model design</h3>
           <ul>
-            <li>Positional embeddings for both 3D positions and viewing directions.</li>
-            <li>Multi-layer perceptron with skip connections to preserve low-frequency information.</li>
-            <li>Separate heads for density and color prediction.</li>
+            <li>Separate positional encodings for 3D locations and viewing directions.</li>
+            <li>A deep MLP backbone with skip connections to preserve low‑frequency information.</li>
+            <li>Distinct output branches for density (σ) and RGB color.</li>
           </ul>
         </div>
 
@@ -379,12 +368,10 @@
 
         <h3>Part 2.5 — Volume rendering and bulldozer reconstruction</h3>
         <p>
-          I implement the volume rendering function that composites predictions along each ray. Given per-sample RGB
-          values and densities, it outputs a single reconstructed pixel.
+          Finally, I write the differentiable volume rendering routine that turns NeRF outputs into pixels. For each ray, it accumulates contributions from all sampled points using their predicted densities and colors to produce a single RGB value.
         </p>
         <p>
-          I use the cumulative product trick in PyTorch to efficiently compute transmittance <code>T_i</code> values,
-          which significantly speeds up rendering compared to a naïve loop.
+          I use PyTorch’s <code>cumprod</code> to efficiently compute the transmittance terms <code>T_i</code> along each ray, avoiding explicit Python loops and making rendering fast enough for training on many rays per batch.
         </p>
 
         <div class="gallery">
@@ -406,13 +393,14 @@
       <section id="part26">
         <h2>Part 2.6: Training with My Own Data</h2>
         <p>
-          In the final part I train a NeRF model on my own dataset captured with an iPhone 13. The model architecture
-          is kept the same as in Part 2.4; I only adjust the <code>near</code> and <code>far</code> bounds used when
-          sampling along rays to better match the scale of the scene.
+          To finish the project, I collect my own multi‑view dataset using an iPhone 17 Pro and reuse the same NeRF
+          architecture as in Part 2.4. Rather than redesigning the network, I mainly retune the sampling range along
+          each ray by adjusting the <code>near</code> and <code>far</code> bounds to match the size and distance of my scene.
         </p>
         <p>
-          The reconstruction quality is relatively low because some views hide important parts of the scene. The
-          markers (tags) are occluded from certain directions, so the model never sees consistent supervision for those regions.
+          The resulting reconstruction is noticeably noisier than the bulldozer example. In several viewpoints the
+          calibration tags end up hidden behind the object, so NeRF never observes consistent supervision from all
+          directions and struggles to fully recover the geometry and appearance of those occluded regions.
         </p>
 
         <div class="gallery">
@@ -446,4 +434,3 @@
   </footer>
 </body>
 </html>
-
