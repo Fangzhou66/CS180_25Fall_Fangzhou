@@ -292,15 +292,6 @@
       text-align: center;
       position: relative;
     }
-    .formula::before {
-      content: '📐';
-      position: absolute;
-      top: -12px;
-      left: 20px;
-      background: var(--card-bg);
-      padding: 0 8px;
-      font-size: 18px;
-    }
     .formula p {
       margin: 8px 0;
       max-width: none;
@@ -814,7 +805,7 @@
 
       <!-- Part B.1 -->
       <section id="partb1">
-        <h2>Part B.1.1 and Part B.1.2.0: Implement the UNet and Visualizing the Noisy Images</h2>
+        <h2>Part B.1.1 and Part B.1.2.0:&nbsp;Implement the UNet and Visualizing the Noisy Images</h2>
         <p>We implement a UNet architecture for denoising MNIST digits. The noising process adds Gaussian noise to clean images:</p>
         <div class="formula">
           <p>\[ z = x + \sigma \epsilon, \quad \text{where } \epsilon \sim \mathcal{N}(0, I) \]</p>
@@ -886,7 +877,7 @@
         </div>
         <p>During sampling, we start from pure noise \(x_0\) and iteratively apply the predicted velocity to reach the clean image.</p>
 
-        <h2>Part B.2.1 and Part B.2.2: Adding Time Conditioning to UNet and Training the UNet</h2>
+        <h2>Part B.2.1 and Part B.2.2:&nbsp;Adding Time Conditioning to UNet and Training the UNet</h2>
         <p>To enable the UNet to handle different timesteps, we add time conditioning. The scalar \(t \in [0, 1]\) is embedded via fully-connected blocks (FCBlocks) and used to modulate the intermediate feature maps. This allows the network to learn different behaviors at different points along the flow trajectory.</p>
         <div class="gallery gallery-two">
           <figure>
@@ -899,7 +890,7 @@
           </figure>
         </div>
 
-        <h2>Part B.2.3 and Part B.2.4: Adding Class-Conditioning to UNet and Training the UNet</h2>
+        <h2>Part B.2.3 and Part B.2.4:&nbsp;Adding Class-Conditioning to UNet and Training the UNet</h2>
         <p>To generate specific digit classes, we add class conditioning using one-hot encoded class vectors \(c\). Similar to time conditioning, the class embedding is processed through FCBlocks and combined with the features. The network now takes both time and class as input: \(u_\theta(x_t, c, t)\). This enables controllable generation of specific digits (0-9).</p>
         <div class="gallery gallery-two">
           <figure>
