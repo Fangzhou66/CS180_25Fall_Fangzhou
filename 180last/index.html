@@ -392,6 +392,48 @@
     section {
       animation: fadeInUp 0.5s ease-out;
     }
+
+    /* ===== Print Styles ===== */
+    @media print {
+      figure {
+        break-inside: avoid;
+        page-break-inside: avoid;
+        display: inline-block;
+        max-width: 200px;
+        margin: 8px;
+        box-shadow: none;
+      }
+      figure img {
+        max-height: 150px;
+        width: auto;
+        object-fit: contain;
+      }
+      .gallery,
+      .gallery-row,
+      .gallery-row-4,
+      .gallery-row-6 {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        gap: 10px;
+      }
+      section {
+        break-inside: avoid-page;
+        page-break-inside: auto;
+        box-shadow: none;
+        animation: none;
+      }
+      figure:hover {
+        transform: none;
+        box-shadow: none;
+      }
+      figure:hover img {
+        transform: none;
+      }
+      .back-top {
+        display: none;
+      }
+    }
   </style>
 </head>
 <body>
