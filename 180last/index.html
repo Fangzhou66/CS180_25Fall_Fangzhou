@@ -819,11 +819,11 @@
       <!-- Part B.1 -->
       <section id="partb1">
         <h2>Part B.1.1 and Part B.1.2.0:&nbsp;Implement the UNet and Visualizing the Noisy Images</h2>
-        <p>We implement a UNet architecture for denoising MNIST digits. The noising process adds Gaussian noise to clean images:</p>
+        <p>In this section, I build a UNet-based denoiser for MNIST handwritten digits. The corruption process injects Gaussian noise into the original images according to:</p>
         <div class="formula">
           <p>\[ z = x + \sigma \epsilon, \quad \text{where } \epsilon \sim \mathcal{N}(0, I) \]</p>
         </div>
-        <p>Here \(\sigma\) is the noise level (standard deviation). The following images show examples at different noise levels from 0.0 to 1.0.</p>
+        <p>The parameter \(\sigma\) controls the intensity of the added noise. Below are sample images corrupted with varying noise levels ranging from 0.0 to 1.0.</p>
         <div class="gallery gallery-small">
           <figure>
             <img src="noisy_images.png" alt="Noisy images visualization" loading="lazy" />
@@ -832,11 +832,11 @@
         </div>
 
         <h2>Part B.1.2.1: Training</h2>
-        <p>The UNet is trained on the MNIST dataset with a fixed noise level \(\sigma = 0.5\). We optimize the L2 loss between the denoised output and the clean image:</p>
+        <p>I train the UNet on MNIST using a constant noise level of \(\sigma = 0.5\). The objective is to minimize the mean squared error between the network's output and the ground truth clean image:</p>
         <div class="formula">
           <p>\[ \mathcal{L} = \mathbb{E}_{z,x} \| D_\theta(z) - x \|^2 \]</p>
         </div>
-        <p>where \(D_\theta\) is our denoiser network. Below are the training loss curve and the denoised results after the first and final epochs.</p>
+        <p>Here \(D_\theta\) represents the denoising network. The figures below show both the training loss progression and a visual comparison of denoised outputs from the initial and final training epochs.</p>
         <div class="gallery gallery-two">
           <figure>
             <img src="ood_testing.png" alt="Denoising comparison" loading="lazy" />
@@ -849,7 +849,7 @@
         </div>
 
         <h2>Part B.1.2.2: Out-of-Distribution Testing</h2>
-        <p>This section tests the trained UNet's performance on out-of-distribution data, ie. images with different noise levels. With a larger noise level, the denoising performance seems to drop, which makes sense since the model is not trained on such levels.</p>
+        <p>Here I evaluate how well the trained model generalizes to noise levels it was not exposed to during training. As expected, reconstruction quality degrades when the input noise intensity differs significantly from the training distribution (\(\sigma = 0.5\)).</p>
         <div class="gallery gallery-small">
           <figure>
             <img src="denoising_grid.png" alt="OOD testing" loading="lazy" />
@@ -858,7 +858,7 @@
         </div>
 
         <h2>Part B.1.2.3: Denoising Pure Noise</h2>
-        <p>This section trains a UNet to denoise a pure noise. Since the training is not conditioned on the classes, we expect the model to output images that don't look like actual numbers.</p>
+        <p>I also attempt to apply the denoiser to pure Gaussian noise (no underlying image). Without any class-conditional guidance, the network produces outputs that blend characteristics from multiple digit classes rather than coherent single digits.</p>
         <div class="gallery gallery-two">
           <figure>
             <img src="pure_noise_denoising.png" alt="Pure noise denoising" loading="lazy" />
@@ -869,59 +869,56 @@
             <figcaption>Training Loss Curve for the UNet Trained for Denoising Pure Noises</figcaption>
           </figure>
         </div>
-        <p>Notice that the outputted images have features of different numbers in the training dataset. This is because the training is not conditioned on classes; therefore, pure noise can be denoised to any number during the training process.</p>
+        <p>The generated images exhibit mixed features from various digits in the dataset. This behavior arises because the model lacks class conditioning, allowing pure noise to map to any digit during the denoising process.</p>
       </section>
 
       <!-- Part B.2 -->
       <section id="partb2">
         <h2>Part B.2: Training a Flow Matching Model</h2>
-        <p>The one-step denoiser doesn't work well for pure noise. Therefore, we implement a flow matching model that iteratively transforms noise into clean images. The key idea is to learn a velocity field that describes how to move from noise to data.</p>
-        <p>We define an interpolation between noise \(x_0 \sim \mathcal{N}(0, I)\) and clean data \(x_1\):</p>
+        <p>Since single-step denoising fails to produce meaningful results from pure noise, I turn to flow matching—an iterative approach that gradually transforms random noise into structured images by learning a continuous velocity field.</p>
+        <p>The method defines a linear path connecting noise \(x_0 \sim \mathcal{N}(0, I)\) to clean data \(x_1\):</p>
         <div class="formula">
           <p>\[ x_t = (1 - t) x_0 + t \cdot x_1, \quad t \in [0, 1] \]</p>
         </div>
-        <p>The velocity (or flow) at any point is simply:</p>
+        <p>Along this trajectory, the instantaneous velocity is given by:</p>
         <div class="formula">
           <p>\[ v_t = \frac{d}{dt} x_t = x_1 - x_0 \]</p>
         </div>
-        <p>We train the network \(u_\theta\) to predict this velocity using the flow matching loss:</p>
+        <p>The neural network \(u_\theta\) learns to approximate this velocity by minimizing the flow matching objective:</p>
         <div class="formula">
           <p>\[ \mathcal{L}_{\text{FM}} = \mathbb{E}_{t, x_0, x_1} \| u_\theta(x_t, t) - (x_1 - x_0) \|^2 \]</p>
         </div>
-        <p>During sampling, we start from pure noise \(x_0\) and iteratively apply the predicted velocity to reach the clean image.</p>
+        <p>At inference time, generation begins with a random noise sample \(x_0\), and the learned velocity field is integrated step-by-step to arrive at a clean image.</p>
 
         <h2>Part B.2.1 and Part B.2.2:&nbsp;Adding Time Conditioning to UNet and Training the UNet</h2>
-        <p>To enable the UNet to handle different timesteps, we add time conditioning. The scalar \(t \in [0, 1]\) is embedded via fully-connected blocks (FCBlocks) and used to modulate the intermediate feature maps. This allows the network to learn different behaviors at different points along the flow trajectory.</p>
-        <div class="gallery gallery-two">
-          <figure>
-            <img src="time_conditioned_sampling.png" alt="Time-conditioned sampling" loading="lazy" />
-            <figcaption>Sampled Results from the Time-Conditioned UNet</figcaption>
-          </figure>
+        <p>To make the network aware of the current position along the flow trajectory, I inject time information through fully connected layers that modulate the feature maps prior to concatenation operations. The resulting training curve is shown below.</p>
+        <div class="gallery gallery-small">
           <figure>
             <img src="training_curve_time_conditioned.png" alt="Time-conditioned training" loading="lazy" />
             <figcaption>Training Loss Curve for the Time-Conditioned UNet</figcaption>
           </figure>
         </div>
 
-        <h2>Part B.2.3 and Part B.2.4:&nbsp;Adding Class-Conditioning to UNet and Training the UNet</h2>
-        <p>To generate specific digit classes, we add class conditioning using one-hot encoded class vectors \(c\). Similar to time conditioning, the class embedding is processed through FCBlocks and combined with the features. The network now takes both time and class as input: \(u_\theta(x_t, c, t)\). This enables controllable generation of specific digits (0-9).</p>
-        <div class="gallery gallery-two">
+        <h2>Part B.2.3:&nbsp;Sampling from the UNet</h2>
+        <p>Below are generated samples from the time-conditioned model at different stages of training: after the first epoch, the fifth epoch, and upon completion.</p>
+        <div class="gallery gallery-small">
           <figure>
-            <img src="class_samples_epochFinal.png" alt="Class samples final" loading="lazy" />
-            <figcaption>Sampled Results of the Class-Conditioned Unet after the Final Epoch</figcaption>
+            <img src="time_conditioned_sampling.png" alt="Time-conditioned sampling" loading="lazy" />
+            <figcaption>Sampled Results from the Time-Conditioned UNet</figcaption>
           </figure>
+        </div>
+
+        <h2>Part B.2.4 and Part B.2.5:&nbsp;Adding Class-Conditioning to UNet and Training the UNet</h2>
+        <p>For more controlled digit generation, I extend the architecture with class conditioning. A one-hot encoded class label is processed through additional fully connected layers and merged with the existing features. The training dynamics for this enhanced model are displayed below.</p>
+        <div class="gallery gallery-small">
           <figure>
             <img src="training_curve_class_conditioned.png" alt="Class-conditioned training" loading="lazy" />
             <figcaption>Training Loss Curve for the Class-Conditioned UNet</figcaption>
           </figure>
         </div>
 
-        <h2>Part B.2.5: Sampling from the UNet</h2>
-        <p>To generate images, we start with pure noise \(x_0 \sim \mathcal{N}(0, I)\) and iteratively apply the predicted velocity over \(T\) steps:</p>
-        <div class="formula">
-          <p>\[ x_{t+\Delta t} = x_t + \Delta t \cdot u_\theta(x_t, c, t) \]</p>
-        </div>
-        <p>The following images demonstrate the generation quality after the first, fifth, and final epochs. More training leads to better digit generation.</p>
+        <h2>Part B.2.6:&nbsp;Sampling from the UNet</h2>
+        <p>The following visualizations compare generation quality across training epochs for the class-conditioned model. Longer training consistently yields sharper and more recognizable digits.</p>
         <div class="gallery">
           <figure>
             <img src="class_samples_epoch0.png" alt="Class samples epoch 0" loading="lazy" />
@@ -936,16 +933,15 @@
             <figcaption>Sampled Results of the Class-Conditioned Unet after the Final Epoch</figcaption>
           </figure>
         </div>
-
-        <p>To keep the training process simple, we can get rid of the scheduler and use a constant learning rate instead (perhaps with a smaller learning rate and more training steps). I choose to train the model with a constant learning rate of 1e-3 for 20 epochs. The following images demonstrate the training and sampled results.</p>
+        <p>As an alternative to using a learning rate scheduler, I also experiment with a fixed learning rate of 1e-3 over 20 epochs. This simplified setup still produces reasonable results, as demonstrated below.</p>
         <div class="gallery gallery-two">
-          <figure>
-            <img src="class_samples_epochFinal_no_scheduler.png" alt="Class samples final no scheduler" loading="lazy" />
-            <figcaption>Sampled Results of the Class-Conditioned Unet after the Final Epoch without the Scheduler</figcaption>
-          </figure>
           <figure>
             <img src="training_curve_class_conditioned_no_scheduler.png" alt="Class-conditioned no scheduler" loading="lazy" />
             <figcaption>Training Loss Curve for the Class-Conditioned UNet without the Scheduler</figcaption>
+          </figure>
+          <figure>
+            <img src="class_samples_epochFinal_no_scheduler.png" alt="Class samples final no scheduler" loading="lazy" />
+            <figcaption>Sampled Results of the Class-Conditioned Unet after the Final Epoch without the Scheduler</figcaption>
           </figure>
         </div>
       </section>
