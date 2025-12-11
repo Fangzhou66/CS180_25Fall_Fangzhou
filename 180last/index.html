@@ -108,6 +108,22 @@
     }
     .gallery-two { grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
     .gallery-wide { grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); }
+    .gallery-row {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 12px;
+      margin: 20px 0 8px;
+    }
+    .gallery-row figure { box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06); }
+    .gallery-row figcaption { padding: 10px 8px 12px; font-size: 12px; text-align: center; }
+    .gallery-row-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin: 20px 0 8px;
+    }
+    .gallery-row-4 figure { box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06); }
+    .gallery-row-4 figcaption { padding: 10px 8px 12px; font-size: 13px; text-align: center; }
     figure {
       margin: 0;
       background: #ffffff;
@@ -288,110 +304,110 @@
         <p>The following images are results from the image-to-image translation. It includes the Campanile image, a web image, and two hand-drawn images.</p>
 
         <h3>Campanile Image</h3>
-        <div class="gallery">
-          <figure><img src="campanile_edited_original.png" alt="Campanile original" loading="lazy" /><figcaption>Campanile, original</figcaption></figure>
-          <figure><img src="campanile_edited_1.png" alt="Campanile i_start=1" loading="lazy" /><figcaption>Campanile, i_start = 1</figcaption></figure>
-          <figure><img src="campanile_edited_3.png" alt="Campanile i_start=3" loading="lazy" /><figcaption>Campanile, i_start = 3</figcaption></figure>
-          <figure><img src="campanile_edited_5.png" alt="Campanile i_start=5" loading="lazy" /><figcaption>Campanile, i_start = 5</figcaption></figure>
-          <figure><img src="campanile_edited_7.png" alt="Campanile i_start=7" loading="lazy" /><figcaption>Campanile, i_start = 7</figcaption></figure>
-          <figure><img src="campanile_edited_10.png" alt="Campanile i_start=10" loading="lazy" /><figcaption>Campanile, i_start = 10</figcaption></figure>
-          <figure><img src="campanile_edited_20.png" alt="Campanile i_start=20" loading="lazy" /><figcaption>Campanile, i_start = 20</figcaption></figure>
+        <div class="gallery-row">
+          <figure><img src="campanile_edited_1.png" alt="Campanile i_start=1" loading="lazy" /><figcaption>i_start = 1</figcaption></figure>
+          <figure><img src="campanile_edited_3.png" alt="Campanile i_start=3" loading="lazy" /><figcaption>i_start = 3</figcaption></figure>
+          <figure><img src="campanile_edited_5.png" alt="Campanile i_start=5" loading="lazy" /><figcaption>i_start = 5</figcaption></figure>
+          <figure><img src="campanile_edited_7.png" alt="Campanile i_start=7" loading="lazy" /><figcaption>i_start = 7</figcaption></figure>
+          <figure><img src="campanile_edited_10.png" alt="Campanile i_start=10" loading="lazy" /><figcaption>i_start = 10</figcaption></figure>
+          <figure><img src="campanile_edited_20.png" alt="Campanile i_start=20" loading="lazy" /><figcaption>i_start = 20</figcaption></figure>
+          <figure><img src="campanile_edited_original.png" alt="Campanile original" loading="lazy" /><figcaption>original</figcaption></figure>
         </div>
 
         <h3>Tom and Jerry</h3>
-        <div class="gallery">
-          <figure><img src="tom_and_jerry.png" alt="Tom and Jerry original" loading="lazy" /><figcaption>Tom and Jerry, original</figcaption></figure>
-          <figure><img src="tom_and_jerry_1.png" alt="Tom and Jerry i_start=1" loading="lazy" /><figcaption>Tom and Jerry, i_start = 1</figcaption></figure>
-          <figure><img src="tom_and_jerry_3.png" alt="Tom and Jerry i_start=3" loading="lazy" /><figcaption>Tom and Jerry, i_start = 3</figcaption></figure>
-          <figure><img src="tom_and_jerry_5.png" alt="Tom and Jerry i_start=5" loading="lazy" /><figcaption>Tom and Jerry, i_start = 5</figcaption></figure>
-          <figure><img src="tom_and_jerry_7.png" alt="Tom and Jerry i_start=7" loading="lazy" /><figcaption>Tom and Jerry, i_start = 7</figcaption></figure>
-          <figure><img src="tom_and_jerry_10.png" alt="Tom and Jerry i_start=10" loading="lazy" /><figcaption>Tom and Jerry, i_start = 10</figcaption></figure>
-          <figure><img src="tom_and_jerry_20.png" alt="Tom and Jerry i_start=20" loading="lazy" /><figcaption>Tom and Jerry, i_start = 20</figcaption></figure>
+        <div class="gallery-row">
+          <figure><img src="tom_and_jerry_1.png" alt="Tom and Jerry i_start=1" loading="lazy" /><figcaption>i_start = 1</figcaption></figure>
+          <figure><img src="tom_and_jerry_3.png" alt="Tom and Jerry i_start=3" loading="lazy" /><figcaption>i_start = 3</figcaption></figure>
+          <figure><img src="tom_and_jerry_5.png" alt="Tom and Jerry i_start=5" loading="lazy" /><figcaption>i_start = 5</figcaption></figure>
+          <figure><img src="tom_and_jerry_7.png" alt="Tom and Jerry i_start=7" loading="lazy" /><figcaption>i_start = 7</figcaption></figure>
+          <figure><img src="tom_and_jerry_10.png" alt="Tom and Jerry i_start=10" loading="lazy" /><figcaption>i_start = 10</figcaption></figure>
+          <figure><img src="tom_and_jerry_20.png" alt="Tom and Jerry i_start=20" loading="lazy" /><figcaption>i_start = 20</figcaption></figure>
+          <figure><img src="tom_and_jerry.png" alt="Tom and Jerry original" loading="lazy" /><figcaption>original</figcaption></figure>
         </div>
 
         <h3>Drawn Cat</h3>
-        <div class="gallery">
-          <figure><img src="drawn_cat.png" alt="Drawn cat original" loading="lazy" /><figcaption>Drawn Cat, original</figcaption></figure>
-          <figure><img src="drawn_cat_1.png" alt="Drawn cat i_start=1" loading="lazy" /><figcaption>Drawn Cat, i_start = 1</figcaption></figure>
-          <figure><img src="drawn_cat_3.png" alt="Drawn cat i_start=3" loading="lazy" /><figcaption>Drawn Cat, i_start = 3</figcaption></figure>
-          <figure><img src="drawn_cat_5.png" alt="Drawn cat i_start=5" loading="lazy" /><figcaption>Drawn Cat, i_start = 5</figcaption></figure>
-          <figure><img src="drawn_cat_7.png" alt="Drawn cat i_start=7" loading="lazy" /><figcaption>Drawn Cat, i_start = 7</figcaption></figure>
-          <figure><img src="drawn_cat_10.png" alt="Drawn cat i_start=10" loading="lazy" /><figcaption>Drawn Cat, i_start = 10</figcaption></figure>
-          <figure><img src="drawn_cat_20.png" alt="Drawn cat i_start=20" loading="lazy" /><figcaption>Drawn Cat, i_start = 20</figcaption></figure>
+        <div class="gallery-row">
+          <figure><img src="drawn_cat_1.png" alt="Drawn cat i_start=1" loading="lazy" /><figcaption>i_start = 1</figcaption></figure>
+          <figure><img src="drawn_cat_3.png" alt="Drawn cat i_start=3" loading="lazy" /><figcaption>i_start = 3</figcaption></figure>
+          <figure><img src="drawn_cat_5.png" alt="Drawn cat i_start=5" loading="lazy" /><figcaption>i_start = 5</figcaption></figure>
+          <figure><img src="drawn_cat_7.png" alt="Drawn cat i_start=7" loading="lazy" /><figcaption>i_start = 7</figcaption></figure>
+          <figure><img src="drawn_cat_10.png" alt="Drawn cat i_start=10" loading="lazy" /><figcaption>i_start = 10</figcaption></figure>
+          <figure><img src="drawn_cat_20.png" alt="Drawn cat i_start=20" loading="lazy" /><figcaption>i_start = 20</figcaption></figure>
+          <figure><img src="drawn_cat.png" alt="Drawn cat original" loading="lazy" /><figcaption>original</figcaption></figure>
         </div>
 
         <h3>Drawn Doraemon</h3>
-        <div class="gallery">
-          <figure><img src="drawn_doraemon.png" alt="Drawn Doraemon original" loading="lazy" /><figcaption>Drawn Doraemon, original</figcaption></figure>
-          <figure><img src="drawn_doraemon_1.png" alt="Drawn Doraemon i_start=1" loading="lazy" /><figcaption>Drawn Doraemon, i_start = 1</figcaption></figure>
-          <figure><img src="drawn_doraemon_3.png" alt="Drawn Doraemon i_start=3" loading="lazy" /><figcaption>Drawn Doraemon, i_start = 3</figcaption></figure>
-          <figure><img src="drawn_doraemon_5.png" alt="Drawn Doraemon i_start=5" loading="lazy" /><figcaption>Drawn Doraemon, i_start = 5</figcaption></figure>
-          <figure><img src="drawn_doraemon_7.png" alt="Drawn Doraemon i_start=7" loading="lazy" /><figcaption>Drawn Doraemon, i_start = 7</figcaption></figure>
-          <figure><img src="drawn_doraemon_10.png" alt="Drawn Doraemon i_start=10" loading="lazy" /><figcaption>Drawn Doraemon, i_start = 10</figcaption></figure>
-          <figure><img src="drawn_doraemon_20.png" alt="Drawn Doraemon i_start=20" loading="lazy" /><figcaption>Drawn Doraemon, i_start = 20</figcaption></figure>
+        <div class="gallery-row">
+          <figure><img src="drawn_doraemon_1.png" alt="Drawn Doraemon i_start=1" loading="lazy" /><figcaption>i_start = 1</figcaption></figure>
+          <figure><img src="drawn_doraemon_3.png" alt="Drawn Doraemon i_start=3" loading="lazy" /><figcaption>i_start = 3</figcaption></figure>
+          <figure><img src="drawn_doraemon_5.png" alt="Drawn Doraemon i_start=5" loading="lazy" /><figcaption>i_start = 5</figcaption></figure>
+          <figure><img src="drawn_doraemon_7.png" alt="Drawn Doraemon i_start=7" loading="lazy" /><figcaption>i_start = 7</figcaption></figure>
+          <figure><img src="drawn_doraemon_10.png" alt="Drawn Doraemon i_start=10" loading="lazy" /><figcaption>i_start = 10</figcaption></figure>
+          <figure><img src="drawn_doraemon_20.png" alt="Drawn Doraemon i_start=20" loading="lazy" /><figcaption>i_start = 20</figcaption></figure>
+          <figure><img src="drawn_doraemon.png" alt="Drawn Doraemon original" loading="lazy" /><figcaption>original</figcaption></figure>
         </div>
 
         <h2>Part 1.7.2: Inpainting</h2>
         <p>This section implements the inpainting technique. In every denoising step, we denoise the whole image. However, only the area with a mask value of 1 is kept. Other areas are reobtained in the next step from redoing the forward pass on the original image. This achieves the effect of only diffusing the masked area with the context unchanged.</p>
 
         <h3>Campanile Inpainting</h3>
-        <div class="gallery gallery-two">
-          <figure><img src="campanile_inpainted_Original.png" alt="Campanile original" loading="lazy" /><figcaption>Campanile Image, Original</figcaption></figure>
-          <figure><img src="campanile_mask_Mask.png" alt="Campanile mask" loading="lazy" /><figcaption>Campanile Image, Mask</figcaption></figure>
-          <figure><img src="campanile_mask_To Replace.png" alt="Campanile to replace" loading="lazy" /><figcaption>Campanile Image, To Replace</figcaption></figure>
-          <figure><img src="campanile_inpainted_Inpainted.png" alt="Campanile inpainted" loading="lazy" /><figcaption>Campanile Image, Inpainted</figcaption></figure>
+        <div class="gallery-row-4">
+          <figure><img src="campanile_inpainted_Original.png" alt="Campanile original" loading="lazy" /><figcaption>Original</figcaption></figure>
+          <figure><img src="campanile_mask_Mask.png" alt="Campanile mask" loading="lazy" /><figcaption>Mask</figcaption></figure>
+          <figure><img src="campanile_mask_To Replace.png" alt="Campanile to replace" loading="lazy" /><figcaption>To Replace</figcaption></figure>
+          <figure><img src="campanile_inpainted_Inpainted.png" alt="Campanile inpainted" loading="lazy" /><figcaption>Inpainted</figcaption></figure>
         </div>
 
         <h3>Dog Inpainting</h3>
-        <div class="gallery gallery-two">
-          <figure><img src="dog_inpainted_Original.png" alt="Dog original" loading="lazy" /><figcaption>Dog Image, Original</figcaption></figure>
-          <figure><img src="dog_mask_Mask.png" alt="Dog mask" loading="lazy" /><figcaption>Dog Image, Mask</figcaption></figure>
-          <figure><img src="dog_mask_To Replace.png" alt="Dog to replace" loading="lazy" /><figcaption>Dog Image, To Replace</figcaption></figure>
-          <figure><img src="dog_inpainted_Inpainted.png" alt="Dog inpainted" loading="lazy" /><figcaption>Dog Image, Inpainted</figcaption></figure>
+        <div class="gallery-row-4">
+          <figure><img src="dog_inpainted_Original.png" alt="Dog original" loading="lazy" /><figcaption>Original</figcaption></figure>
+          <figure><img src="dog_mask_Mask.png" alt="Dog mask" loading="lazy" /><figcaption>Mask</figcaption></figure>
+          <figure><img src="dog_mask_To Replace.png" alt="Dog to replace" loading="lazy" /><figcaption>To Replace</figcaption></figure>
+          <figure><img src="dog_inpainted_Inpainted.png" alt="Dog inpainted" loading="lazy" /><figcaption>Inpainted</figcaption></figure>
         </div>
 
         <h3>Charger Inpainting</h3>
-        <div class="gallery gallery-two">
-          <figure><img src="charger_inpainted_Original.png" alt="Charger original" loading="lazy" /><figcaption>Charger Image, Original</figcaption></figure>
-          <figure><img src="charger_mask_Mask.png" alt="Charger mask" loading="lazy" /><figcaption>Charger Image, Mask</figcaption></figure>
-          <figure><img src="charger_mask_To Replace.png" alt="Charger to replace" loading="lazy" /><figcaption>Charger Image, To Replace</figcaption></figure>
-          <figure><img src="charger_inpainted_Inpainted.png" alt="Charger inpainted" loading="lazy" /><figcaption>Charger Image, Inpainted</figcaption></figure>
+        <div class="gallery-row-4">
+          <figure><img src="charger_inpainted_Original.png" alt="Charger original" loading="lazy" /><figcaption>Original</figcaption></figure>
+          <figure><img src="charger_mask_Mask.png" alt="Charger mask" loading="lazy" /><figcaption>Mask</figcaption></figure>
+          <figure><img src="charger_mask_To Replace.png" alt="Charger to replace" loading="lazy" /><figcaption>To Replace</figcaption></figure>
+          <figure><img src="charger_inpainted_Inpainted.png" alt="Charger inpainted" loading="lazy" /><figcaption>Inpainted</figcaption></figure>
         </div>
 
         <h2>Part 1.7.3: Text-Conditional Image-to-image Translation</h2>
         <p>This section is very similar to the image-to-image translation task. The only difference is that in this task, we use a custom textual prompt instead of a general prompt.</p>
 
         <h3>Campanile with Text Prompt</h3>
-        <div class="gallery">
-          <figure><img src="campanile_edited_original.png" alt="Campanile original" loading="lazy" /><figcaption>Campanile, original</figcaption></figure>
-          <figure><img src="companile_transform_1.png" alt="Campanile transform i_start=1" loading="lazy" /><figcaption>Campanile, i_start = 1</figcaption></figure>
-          <figure><img src="companile_transform_3.png" alt="Campanile transform i_start=3" loading="lazy" /><figcaption>Campanile, i_start = 3</figcaption></figure>
-          <figure><img src="companile_transform_5.png" alt="Campanile transform i_start=5" loading="lazy" /><figcaption>Campanile, i_start = 5</figcaption></figure>
-          <figure><img src="companile_transform_7.png" alt="Campanile transform i_start=7" loading="lazy" /><figcaption>Campanile, i_start = 7</figcaption></figure>
-          <figure><img src="companile_transform_10.png" alt="Campanile transform i_start=10" loading="lazy" /><figcaption>Campanile, i_start = 10</figcaption></figure>
-          <figure><img src="companile_transform_20.png" alt="Campanile transform i_start=20" loading="lazy" /><figcaption>Campanile, i_start = 20</figcaption></figure>
+        <div class="gallery-row">
+          <figure><img src="companile_transform_1.png" alt="Campanile transform i_start=1" loading="lazy" /><figcaption>i_start = 1</figcaption></figure>
+          <figure><img src="companile_transform_3.png" alt="Campanile transform i_start=3" loading="lazy" /><figcaption>i_start = 3</figcaption></figure>
+          <figure><img src="companile_transform_5.png" alt="Campanile transform i_start=5" loading="lazy" /><figcaption>i_start = 5</figcaption></figure>
+          <figure><img src="companile_transform_7.png" alt="Campanile transform i_start=7" loading="lazy" /><figcaption>i_start = 7</figcaption></figure>
+          <figure><img src="companile_transform_10.png" alt="Campanile transform i_start=10" loading="lazy" /><figcaption>i_start = 10</figcaption></figure>
+          <figure><img src="companile_transform_20.png" alt="Campanile transform i_start=20" loading="lazy" /><figcaption>i_start = 20</figcaption></figure>
+          <figure><img src="campanile_edited_original.png" alt="Campanile original" loading="lazy" /><figcaption>original</figcaption></figure>
         </div>
 
         <h3>Car with Text Prompt</h3>
-        <div class="gallery">
-          <figure><img src="car_edited_original.png" alt="Car original" loading="lazy" /><figcaption>Car, original</figcaption></figure>
-          <figure><img src="car_edited_1.png" alt="Car i_start=1" loading="lazy" /><figcaption>Car, i_start = 1</figcaption></figure>
-          <figure><img src="car_edited_3.png" alt="Car i_start=3" loading="lazy" /><figcaption>Car, i_start = 3</figcaption></figure>
-          <figure><img src="car_edited_5.png" alt="Car i_start=5" loading="lazy" /><figcaption>Car, i_start = 5</figcaption></figure>
-          <figure><img src="car_edited_7.png" alt="Car i_start=7" loading="lazy" /><figcaption>Car, i_start = 7</figcaption></figure>
-          <figure><img src="car_edited_10.png" alt="Car i_start=10" loading="lazy" /><figcaption>Car, i_start = 10</figcaption></figure>
-          <figure><img src="car_edited_20.png" alt="Car i_start=20" loading="lazy" /><figcaption>Car, i_start = 20</figcaption></figure>
+        <div class="gallery-row">
+          <figure><img src="car_edited_1.png" alt="Car i_start=1" loading="lazy" /><figcaption>i_start = 1</figcaption></figure>
+          <figure><img src="car_edited_3.png" alt="Car i_start=3" loading="lazy" /><figcaption>i_start = 3</figcaption></figure>
+          <figure><img src="car_edited_5.png" alt="Car i_start=5" loading="lazy" /><figcaption>i_start = 5</figcaption></figure>
+          <figure><img src="car_edited_7.png" alt="Car i_start=7" loading="lazy" /><figcaption>i_start = 7</figcaption></figure>
+          <figure><img src="car_edited_10.png" alt="Car i_start=10" loading="lazy" /><figcaption>i_start = 10</figcaption></figure>
+          <figure><img src="car_edited_20.png" alt="Car i_start=20" loading="lazy" /><figcaption>i_start = 20</figcaption></figure>
+          <figure><img src="car_edited_original.png" alt="Car original" loading="lazy" /><figcaption>original</figcaption></figure>
         </div>
 
         <h3>Kiwi with Text Prompt</h3>
-        <div class="gallery">
-          <figure><img src="kiwi_edited_original.png" alt="Kiwi original" loading="lazy" /><figcaption>Kiwi, original</figcaption></figure>
-          <figure><img src="kiwi_edited_1.png" alt="Kiwi i_start=1" loading="lazy" /><figcaption>Kiwi, i_start = 1</figcaption></figure>
-          <figure><img src="kiwi_edited_3.png" alt="Kiwi i_start=3" loading="lazy" /><figcaption>Kiwi, i_start = 3</figcaption></figure>
-          <figure><img src="kiwi_edited_5.png" alt="Kiwi i_start=5" loading="lazy" /><figcaption>Kiwi, i_start = 5</figcaption></figure>
-          <figure><img src="kiwi_edited_7.png" alt="Kiwi i_start=7" loading="lazy" /><figcaption>Kiwi, i_start = 7</figcaption></figure>
-          <figure><img src="kiwi_edited_10.png" alt="Kiwi i_start=10" loading="lazy" /><figcaption>Kiwi, i_start = 10</figcaption></figure>
-          <figure><img src="kiwi_edited_20.png" alt="Kiwi i_start=20" loading="lazy" /><figcaption>Kiwi, i_start = 20</figcaption></figure>
+        <div class="gallery-row">
+          <figure><img src="kiwi_edited_1.png" alt="Kiwi i_start=1" loading="lazy" /><figcaption>i_start = 1</figcaption></figure>
+          <figure><img src="kiwi_edited_3.png" alt="Kiwi i_start=3" loading="lazy" /><figcaption>i_start = 3</figcaption></figure>
+          <figure><img src="kiwi_edited_5.png" alt="Kiwi i_start=5" loading="lazy" /><figcaption>i_start = 5</figcaption></figure>
+          <figure><img src="kiwi_edited_7.png" alt="Kiwi i_start=7" loading="lazy" /><figcaption>i_start = 7</figcaption></figure>
+          <figure><img src="kiwi_edited_10.png" alt="Kiwi i_start=10" loading="lazy" /><figcaption>i_start = 10</figcaption></figure>
+          <figure><img src="kiwi_edited_20.png" alt="Kiwi i_start=20" loading="lazy" /><figcaption>i_start = 20</figcaption></figure>
+          <figure><img src="kiwi_edited_original.png" alt="Kiwi original" loading="lazy" /><figcaption>original</figcaption></figure>
         </div>
       </section>
 
