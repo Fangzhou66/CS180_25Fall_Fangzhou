@@ -156,265 +156,389 @@
       <p class="lead">Diffusion forward and reverse processes, denoising strategies, image-to-image workflows, classifier-free guidance, and UNet training for flow matching.</p>
       <nav class="toc">
         <a href="#part0"><span>Part 0</span> Setup &amp; text prompts</a>
-        <a href="#part1"><span>Part 1</span> Forward/denoising &amp; guidance</a>
+        <a href="#part1"><span>Part 1.1-1.2</span> Forward pass &amp; classical denoising</a>
+        <a href="#part13"><span>Part 1.3</span> One-step denoising</a>
+        <a href="#part14"><span>Part 1.4</span> Iterative denoising</a>
+        <a href="#part15"><span>Part 1.5-1.6</span> Sampling &amp; CFG</a>
         <a href="#part17"><span>Part 1.7</span> Image-to-image &amp; inpainting</a>
-        <a href="#part18"><span>Part 1.8–1.9</span> Visual anagrams &amp; hybrids</a>
-        <a href="#partb"><span>Part B</span> UNet training &amp; flow matching</a>
+        <a href="#part18"><span>Part 1.8-1.9</span> Visual anagrams &amp; hybrids</a>
+        <a href="#partb1"><span>Part B.1</span> UNet &amp; single-step denoising</a>
+        <a href="#partb2"><span>Part B.2</span> Flow matching model</a>
       </nav>
     </div>
   </header>
 
   <main>
     <div class="container">
+      <!-- Part 0 -->
       <section id="part0">
         <h2>Part 0: Setup and Playing with My Own Text Prompt</h2>
-        <p>Prompt set (seed 100): “a rocket ship”, “a photo of a dog”, and “a pencil”. First row uses 50 inference steps; second row uses 100 steps—more steps sharpen details, especially on the animal prompt.</p>
+        <p>This part sets up the environment and plays with my own text prompt. We can observe that for prompts that are too abstract or OOD, the generated images are not very good. However, for prompts that are more specific and in-domain, the generated images are much better. The seed chosen is here is 100 for reproducibility.</p>
+        <p>The first row shows the generated image with a inference step of 50, while the second row shows the generated image with a inference step of 100.</p>
         <div class="gallery">
           <figure>
-            <img src="stage_2_output_inference_50_0.png" alt="Rocket ship at 50 steps" loading="lazy" />
-            <figcaption>“a rocket ship”, 50 steps.</figcaption>
+            <img src="stage_2_output_inference_50_0.png" alt="a rocket ship, step 50" loading="lazy" />
+            <figcaption>"a rocket ship", step 50</figcaption>
           </figure>
           <figure>
-            <img src="stage_2_output_inference_50_1.png" alt="Dog photo at 50 steps" loading="lazy" />
-            <figcaption>“a photo of a dog”, 50 steps.</figcaption>
+            <img src="stage_2_output_inference_50_1.png" alt="a photo of a dog, step 50" loading="lazy" />
+            <figcaption>"a photo of a dog", step 50</figcaption>
           </figure>
           <figure>
-            <img src="stage_2_output_inference_50_2.png" alt="Pencil at 50 steps" loading="lazy" />
-            <figcaption>“a pencil”, 50 steps.</figcaption>
+            <img src="stage_2_output_inference_50_2.png" alt="a pencil, step 50" loading="lazy" />
+            <figcaption>"a pencil", step 50</figcaption>
           </figure>
           <figure>
-            <img src="stage_2_output_inference_100_0.png" alt="Rocket ship at 100 steps" loading="lazy" />
-            <figcaption>“a rocket ship”, 100 steps.</figcaption>
+            <img src="stage_2_output_inference_100_0.png" alt="a rocket ship, step 100" loading="lazy" />
+            <figcaption>"a rocket ship", step 100</figcaption>
           </figure>
           <figure>
-            <img src="stage_2_output_inference_100_1.png" alt="Dog photo at 100 steps" loading="lazy" />
-            <figcaption>“a photo of a dog”, 100 steps.</figcaption>
+            <img src="stage_2_output_inference_100_1.png" alt="a photo of a dog, step 100" loading="lazy" />
+            <figcaption>"a photo of a dog", step 100</figcaption>
           </figure>
           <figure>
-            <img src="stage_2_output_inference_100_2.png" alt="Pencil at 100 steps" loading="lazy" />
-            <figcaption>“a pencil”, 100 steps.</figcaption>
+            <img src="stage_2_output_inference_100_2.png" alt="a pencil, step 100" loading="lazy" />
+            <figcaption>"a pencil", step 100</figcaption>
           </figure>
         </div>
       </section>
 
+      <!-- Part 1.1 and 1.2 -->
       <section id="part1">
-        <h2>Part 1.1–1.2: Forward Pass and Classical Denoising</h2>
-        <p>Forward pass adds noise per schedule; classical denoising uses Gaussian filtering. Frames shown at t = 250, 500, 750.</p>
+        <h2>Part 1.1 and Part 1.2: Forward Pass and Classical Denoising</h2>
+        <p>Part 1.1 implements the forward pass by adding noise according to the noise schedule. Part 1.2 implements the classical denoising by simply passing the noisy images through a gaussian filter. The comparison and the results from part 1.1 are shown below. Images are taken at time steps 250, 500, 750.</p>
         <div class="gallery gallery-wide">
           <figure class="wide">
-            <img src="classical_denoised.png" alt="Forward pass vs classical denoising" loading="lazy" />
-            <figcaption>Forward pass comparison and Gaussian denoising.</figcaption>
-          </figure>
-        </div>
-
-        <h2>Part 1.3: One-Step Denoising</h2>
-        <p>Single denoising pass with an MLP on noisy inputs at multiple time steps.</p>
-        <div class="gallery gallery-two">
-          <figure>
-            <img src="one_step_denoise_250.png" alt="One-step denoising at t=250" loading="lazy" />
-            <figcaption>One-step denoising, t = 250.</figcaption>
-          </figure>
-          <figure>
-            <img src="one_step_denoise_500.png" alt="One-step denoising at t=500" loading="lazy" />
-            <figcaption>One-step denoising, t = 500.</figcaption>
-          </figure>
-        </div>
-        <div class="gallery gallery-two">
-          <figure>
-            <img src="one_step_denoise_750.png" alt="One-step denoising at t=750" loading="lazy" />
-            <figcaption>One-step denoising, t = 750.</figcaption>
-          </figure>
-          <figure>
-            <img src="iterative_denoised.png" alt="Iterative denoising" loading="lazy" />
-            <figcaption>Iterative denoising improvements.</figcaption>
-          </figure>
-        </div>
-
-        <h2>Part 1.4: Iterative Denoising</h2>
-        <p>Repeated denoising passes refine quality. Process visualization on Campanile example.</p>
-        <div class="gallery gallery-two">
-          <figure>
-            <img src="iterative_denoised_process.png" alt="Iterative denoising process" loading="lazy" />
-            <figcaption>Noisy-to-clean trajectory across steps.</figcaption>
-          </figure>
-          <figure>
-            <img src="iterative_denoised.png" alt="Iterative denoising result" loading="lazy" />
-            <figcaption>Final iterative output.</figcaption>
-          </figure>
-        </div>
-
-        <h2>Part 1.5: Diffusion Model Sampling</h2>
-        <p>Unconditional sampling with prompt "a high quality photo".</p>
-        <div class="gallery gallery-small">
-          <figure>
-            <img src="samples.png" alt="Diffusion model samples" loading="lazy" />
-            <figcaption>Five sampled images.</figcaption>
-          </figure>
-        </div>
-
-        <h2>Part 1.6: Classifier-Free Guidance (CFG)</h2>
-        <p>CFG combines conditional and unconditional noise predictions to steer generation.</p>
-        <div class="gallery gallery-small">
-          <figure>
-            <img src="samples_iterative_denoise_cfg.png" alt="CFG sampling" loading="lazy" />
-            <figcaption>CFG sampling outputs.</figcaption>
+            <img src="classical_denoised.png" alt="Forward Pass and Classical Denoising Comparison" loading="lazy" />
+            <figcaption>Forward Pass Comparison and Gaussian Denoising</figcaption>
           </figure>
         </div>
       </section>
 
+      <!-- Part 1.3 -->
+      <section id="part13">
+        <h2>Part 1.3: One-Step Denoising</h2>
+        <p>This part implements the one-step denoising by passing the noisy images through a trained denoising model. The denoising model is a simple MLP that takes in the noisy images and outputs the denoised images. We separately denoise the images at time steps 250, 500, 750.</p>
+        <h3>t = 250:</h3>
+        <div class="gallery gallery-small">
+          <figure>
+            <img src="one_step_denoise_250.png" alt="One-Step Denoising at Time Step 250" loading="lazy" />
+            <figcaption>One-Step Denoising at Time Step 250</figcaption>
+          </figure>
+        </div>
+        <h3>t = 500:</h3>
+        <div class="gallery gallery-small">
+          <figure>
+            <img src="one_step_denoise_500.png" alt="One-Step Denoising at Time Step 500" loading="lazy" />
+            <figcaption>One-Step Denoising at Time Step 500</figcaption>
+          </figure>
+        </div>
+        <h3>t = 750:</h3>
+        <div class="gallery gallery-small">
+          <figure>
+            <img src="one_step_denoise_750.png" alt="One-Step Denoising at Time Step 750" loading="lazy" />
+            <figcaption>One-Step Denoising at Time Step 750</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <!-- Part 1.4 -->
+      <section id="part14">
+        <h2>Part 1.4: Iterative Denoising</h2>
+        <p>While the quality of the one-step denoising is not very good, we can improve it by iterating the denoising process. The iterative denoising process is implemented by passing the noisy images through the denoising model multiple times. We show the noisy Campanile image during the iterative denoising process.</p>
+        <div class="gallery gallery-small">
+          <figure>
+            <img src="iterative_denoised_process.png" alt="Iterative Denoising Process" loading="lazy" />
+            <figcaption>Iterative Denoising Process</figcaption>
+          </figure>
+        </div>
+        <p>Here is a comparison between the classical denoising, the one-step denoising and the iterative denoising.</p>
+        <div class="gallery gallery-small">
+          <figure>
+            <img src="iterative_denoised.png" alt="Comparison between Classical, One-Step, and Iterative Denoising" loading="lazy" />
+            <figcaption>Comparison between the Classical Denoising, the One-Step Denoising and the Iterative Denoising</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <!-- Part 1.5 and 1.6 -->
+      <section id="part15">
+        <h2>Part 1.5: Diffusion Model Sampling</h2>
+        <p>Here are five sampled images from the diffusion model with the prompt "a high quality photo."</p>
+        <div class="gallery gallery-small">
+          <figure>
+            <img src="samples.png" alt="Diffusion Model Sampling" loading="lazy" />
+            <figcaption>Diffusion Model Sampling</figcaption>
+          </figure>
+        </div>
+
+        <h2>Part 1.6: Classifier-Free Guidance</h2>
+        <p>This part implements the classifier-free guidance by estimating the noise with conditional and unconditional predictions, then combining them with a guidance scale.</p>
+        <div class="gallery gallery-small">
+          <figure>
+            <img src="samples_iterative_denoise_cfg.png" alt="Classifier-Free Guidance" loading="lazy" />
+            <figcaption>Classifier-Free Guidance Sampling</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <!-- Part 1.7 -->
       <section id="part17">
         <h2>Part 1.7.1: Image-to-Image Translation</h2>
-        <p>Varying <code>i_start</code> controls how much noise is added before denoising, enabling edits of different strengths.</p>
+        <p>The following images are results from the image-to-image translation. It includes the Campanile image, a web image, and two hand-drawn images.</p>
+
+        <h3>Campanile Image</h3>
         <div class="gallery">
-          <figure><img src="campanile_edited_original.png" alt="Campanile original" loading="lazy" /><figcaption>Campanile original</figcaption></figure>
-          <figure><img src="campanile_edited_1.png" alt="Campanile i_start=1" loading="lazy" /><figcaption>i_start = 1</figcaption></figure>
-          <figure><img src="campanile_edited_3.png" alt="Campanile i_start=3" loading="lazy" /><figcaption>i_start = 3</figcaption></figure>
-          <figure><img src="campanile_edited_5.png" alt="Campanile i_start=5" loading="lazy" /><figcaption>i_start = 5</figcaption></figure>
-          <figure><img src="campanile_edited_7.png" alt="Campanile i_start=7" loading="lazy" /><figcaption>i_start = 7</figcaption></figure>
-          <figure><img src="campanile_edited_10.png" alt="Campanile i_start=10" loading="lazy" /><figcaption>i_start = 10</figcaption></figure>
-          <figure><img src="campanile_edited_20.png" alt="Campanile i_start=20" loading="lazy" /><figcaption>i_start = 20</figcaption></figure>
+          <figure><img src="campanile_edited_original.png" alt="Campanile original" loading="lazy" /><figcaption>Campanile, original</figcaption></figure>
+          <figure><img src="campanile_edited_1.png" alt="Campanile i_start=1" loading="lazy" /><figcaption>Campanile, i_start = 1</figcaption></figure>
+          <figure><img src="campanile_edited_3.png" alt="Campanile i_start=3" loading="lazy" /><figcaption>Campanile, i_start = 3</figcaption></figure>
+          <figure><img src="campanile_edited_5.png" alt="Campanile i_start=5" loading="lazy" /><figcaption>Campanile, i_start = 5</figcaption></figure>
+          <figure><img src="campanile_edited_7.png" alt="Campanile i_start=7" loading="lazy" /><figcaption>Campanile, i_start = 7</figcaption></figure>
+          <figure><img src="campanile_edited_10.png" alt="Campanile i_start=10" loading="lazy" /><figcaption>Campanile, i_start = 10</figcaption></figure>
+          <figure><img src="campanile_edited_20.png" alt="Campanile i_start=20" loading="lazy" /><figcaption>Campanile, i_start = 20</figcaption></figure>
         </div>
+
+        <h3>Tom and Jerry</h3>
         <div class="gallery">
-          <figure><img src="tom_and_jerry.png" alt="Tom and Jerry original" loading="lazy" /><figcaption>Tom and Jerry original</figcaption></figure>
-          <figure><img src="tom_and_jerry_1.png" alt="Tom and Jerry i_start=1" loading="lazy" /><figcaption>i_start = 1</figcaption></figure>
-          <figure><img src="tom_and_jerry_3.png" alt="Tom and Jerry i_start=3" loading="lazy" /><figcaption>i_start = 3</figcaption></figure>
-          <figure><img src="tom_and_jerry_5.png" alt="Tom and Jerry i_start=5" loading="lazy" /><figcaption>i_start = 5</figcaption></figure>
-          <figure><img src="tom_and_jerry_7.png" alt="Tom and Jerry i_start=7" loading="lazy" /><figcaption>i_start = 7</figcaption></figure>
-          <figure><img src="tom_and_jerry_10.png" alt="Tom and Jerry i_start=10" loading="lazy" /><figcaption>i_start = 10</figcaption></figure>
-          <figure><img src="tom_and_jerry_20.png" alt="Tom and Jerry i_start=20" loading="lazy" /><figcaption>i_start = 20</figcaption></figure>
+          <figure><img src="tom_and_jerry.png" alt="Tom and Jerry original" loading="lazy" /><figcaption>Tom and Jerry, original</figcaption></figure>
+          <figure><img src="tom_and_jerry_1.png" alt="Tom and Jerry i_start=1" loading="lazy" /><figcaption>Tom and Jerry, i_start = 1</figcaption></figure>
+          <figure><img src="tom_and_jerry_3.png" alt="Tom and Jerry i_start=3" loading="lazy" /><figcaption>Tom and Jerry, i_start = 3</figcaption></figure>
+          <figure><img src="tom_and_jerry_5.png" alt="Tom and Jerry i_start=5" loading="lazy" /><figcaption>Tom and Jerry, i_start = 5</figcaption></figure>
+          <figure><img src="tom_and_jerry_7.png" alt="Tom and Jerry i_start=7" loading="lazy" /><figcaption>Tom and Jerry, i_start = 7</figcaption></figure>
+          <figure><img src="tom_and_jerry_10.png" alt="Tom and Jerry i_start=10" loading="lazy" /><figcaption>Tom and Jerry, i_start = 10</figcaption></figure>
+          <figure><img src="tom_and_jerry_20.png" alt="Tom and Jerry i_start=20" loading="lazy" /><figcaption>Tom and Jerry, i_start = 20</figcaption></figure>
         </div>
+
+        <h3>Drawn Cat</h3>
         <div class="gallery">
-          <figure><img src="drawn_cat.png" alt="Drawn cat original" loading="lazy" /><figcaption>Drawn cat original</figcaption></figure>
-          <figure><img src="drawn_cat_1.png" alt="Drawn cat i_start=1" loading="lazy" /><figcaption>i_start = 1</figcaption></figure>
-          <figure><img src="drawn_cat_3.png" alt="Drawn cat i_start=3" loading="lazy" /><figcaption>i_start = 3</figcaption></figure>
-          <figure><img src="drawn_cat_5.png" alt="Drawn cat i_start=5" loading="lazy" /><figcaption>i_start = 5</figcaption></figure>
-          <figure><img src="drawn_cat_7.png" alt="Drawn cat i_start=7" loading="lazy" /><figcaption>i_start = 7</figcaption></figure>
-          <figure><img src="drawn_cat_10.png" alt="Drawn cat i_start=10" loading="lazy" /><figcaption>i_start = 10</figcaption></figure>
-          <figure><img src="drawn_cat_20.png" alt="Drawn cat i_start=20" loading="lazy" /><figcaption>i_start = 20</figcaption></figure>
+          <figure><img src="drawn_cat.png" alt="Drawn cat original" loading="lazy" /><figcaption>Drawn Cat, original</figcaption></figure>
+          <figure><img src="drawn_cat_1.png" alt="Drawn cat i_start=1" loading="lazy" /><figcaption>Drawn Cat, i_start = 1</figcaption></figure>
+          <figure><img src="drawn_cat_3.png" alt="Drawn cat i_start=3" loading="lazy" /><figcaption>Drawn Cat, i_start = 3</figcaption></figure>
+          <figure><img src="drawn_cat_5.png" alt="Drawn cat i_start=5" loading="lazy" /><figcaption>Drawn Cat, i_start = 5</figcaption></figure>
+          <figure><img src="drawn_cat_7.png" alt="Drawn cat i_start=7" loading="lazy" /><figcaption>Drawn Cat, i_start = 7</figcaption></figure>
+          <figure><img src="drawn_cat_10.png" alt="Drawn cat i_start=10" loading="lazy" /><figcaption>Drawn Cat, i_start = 10</figcaption></figure>
+          <figure><img src="drawn_cat_20.png" alt="Drawn cat i_start=20" loading="lazy" /><figcaption>Drawn Cat, i_start = 20</figcaption></figure>
         </div>
+
+        <h3>Drawn Doraemon</h3>
         <div class="gallery">
-          <figure><img src="drawn_doraemon.png" alt="Drawn Doraemon original" loading="lazy" /><figcaption>Drawn Doraemon original</figcaption></figure>
-          <figure><img src="drawn_doraemon_1.png" alt="Drawn Doraemon i_start=1" loading="lazy" /><figcaption>i_start = 1</figcaption></figure>
-          <figure><img src="drawn_doraemon_3.png" alt="Drawn Doraemon i_start=3" loading="lazy" /><figcaption>i_start = 3</figcaption></figure>
-          <figure><img src="drawn_doraemon_5.png" alt="Drawn Doraemon i_start=5" loading="lazy" /><figcaption>i_start = 5</figcaption></figure>
-          <figure><img src="drawn_doraemon_7.png" alt="Drawn Doraemon i_start=7" loading="lazy" /><figcaption>i_start = 7</figcaption></figure>
-          <figure><img src="drawn_doraemon_10.png" alt="Drawn Doraemon i_start=10" loading="lazy" /><figcaption>i_start = 10</figcaption></figure>
-          <figure><img src="drawn_doraemon_20.png" alt="Drawn Doraemon i_start=20" loading="lazy" /><figcaption>i_start = 20</figcaption></figure>
+          <figure><img src="drawn_doraemon.png" alt="Drawn Doraemon original" loading="lazy" /><figcaption>Drawn Doraemon, original</figcaption></figure>
+          <figure><img src="drawn_doraemon_1.png" alt="Drawn Doraemon i_start=1" loading="lazy" /><figcaption>Drawn Doraemon, i_start = 1</figcaption></figure>
+          <figure><img src="drawn_doraemon_3.png" alt="Drawn Doraemon i_start=3" loading="lazy" /><figcaption>Drawn Doraemon, i_start = 3</figcaption></figure>
+          <figure><img src="drawn_doraemon_5.png" alt="Drawn Doraemon i_start=5" loading="lazy" /><figcaption>Drawn Doraemon, i_start = 5</figcaption></figure>
+          <figure><img src="drawn_doraemon_7.png" alt="Drawn Doraemon i_start=7" loading="lazy" /><figcaption>Drawn Doraemon, i_start = 7</figcaption></figure>
+          <figure><img src="drawn_doraemon_10.png" alt="Drawn Doraemon i_start=10" loading="lazy" /><figcaption>Drawn Doraemon, i_start = 10</figcaption></figure>
+          <figure><img src="drawn_doraemon_20.png" alt="Drawn Doraemon i_start=20" loading="lazy" /><figcaption>Drawn Doraemon, i_start = 20</figcaption></figure>
         </div>
 
         <h2>Part 1.7.2: Inpainting</h2>
-        <p>Masked regions are diffused while the context is reinserted each step via the forward pass.</p>
+        <p>This section implements the inpainting technique. In every denoising step, we denoise the whole image. However, only the area with a mask value of 1 is kept. Other areas are reobtained in the next step from redoing the forward pass on the original image. This achieves the effect of only diffusing the masked area with the context unchanged.</p>
+
+        <h3>Campanile Inpainting</h3>
         <div class="gallery gallery-two">
-          <figure><img src="campanile_inpainted_Original.png" alt="Campanile inpainting original" loading="lazy" /><figcaption>Campanile original</figcaption></figure>
-          <figure><img src="campanile_mask_Mask.png" alt="Campanile mask" loading="lazy" /><figcaption>Mask</figcaption></figure>
-          <figure><img src="campanile_mask_To Replace.png" alt="Campanile to replace" loading="lazy" /><figcaption>Region to replace</figcaption></figure>
-          <figure><img src="campanile_inpainted_Inpainted.png" alt="Campanile inpainted" loading="lazy" /><figcaption>Inpainted</figcaption></figure>
-        </div>
-        <div class="gallery gallery-two">
-          <figure><img src="dog_inpainted_Original.png" alt="Dog inpainting original" loading="lazy" /><figcaption>Dog original</figcaption></figure>
-          <figure><img src="dog_mask_Mask.png" alt="Dog mask" loading="lazy" /><figcaption>Mask</figcaption></figure>
-          <figure><img src="dog_mask_To Replace.png" alt="Dog to replace" loading="lazy" /><figcaption>Region to replace</figcaption></figure>
-          <figure><img src="dog_inpainted_Inpainted.png" alt="Dog inpainted" loading="lazy" /><figcaption>Inpainted</figcaption></figure>
-        </div>
-        <div class="gallery gallery-two">
-          <figure><img src="charger_inpainted_Original.png" alt="Charger inpainting original" loading="lazy" /><figcaption>Charger original</figcaption></figure>
-          <figure><img src="charger_mask_Mask.png" alt="Charger mask" loading="lazy" /><figcaption>Mask</figcaption></figure>
-          <figure><img src="charger_mask_To Replace.png" alt="Charger to replace" loading="lazy" /><figcaption>Region to replace</figcaption></figure>
-          <figure><img src="charger_inpainted_Inpainted.png" alt="Charger inpainted" loading="lazy" /><figcaption>Inpainted</figcaption></figure>
+          <figure><img src="campanile_inpainted_Original.png" alt="Campanile original" loading="lazy" /><figcaption>Campanile Image, Original</figcaption></figure>
+          <figure><img src="campanile_mask_Mask.png" alt="Campanile mask" loading="lazy" /><figcaption>Campanile Image, Mask</figcaption></figure>
+          <figure><img src="campanile_mask_To Replace.png" alt="Campanile to replace" loading="lazy" /><figcaption>Campanile Image, To Replace</figcaption></figure>
+          <figure><img src="campanile_inpainted_Inpainted.png" alt="Campanile inpainted" loading="lazy" /><figcaption>Campanile Image, Inpainted</figcaption></figure>
         </div>
 
-        <h2>Part 1.7.3: Text-Conditional Image-to-Image</h2>
-        <p>Same pipeline as 1.7.1 but driven by custom text prompts.</p>
-        <div class="gallery">
-          <figure><img src="campanile_edited_original.png" alt="Campanile original" loading="lazy" /><figcaption>Campanile original</figcaption></figure>
-          <figure><img src="companile_transform_1.png" alt="Campanile transform i_start=1" loading="lazy" /><figcaption>i_start = 1</figcaption></figure>
-          <figure><img src="companile_transform_3.png" alt="Campanile transform i_start=3" loading="lazy" /><figcaption>i_start = 3</figcaption></figure>
-          <figure><img src="companile_transform_5.png" alt="Campanile transform i_start=5" loading="lazy" /><figcaption>i_start = 5</figcaption></figure>
-          <figure><img src="companile_transform_7.png" alt="Campanile transform i_start=7" loading="lazy" /><figcaption>i_start = 7</figcaption></figure>
-          <figure><img src="companile_transform_10.png" alt="Campanile transform i_start=10" loading="lazy" /><figcaption>i_start = 10</figcaption></figure>
-          <figure><img src="companile_transform_20.png" alt="Campanile transform i_start=20" loading="lazy" /><figcaption>i_start = 20</figcaption></figure>
+        <h3>Dog Inpainting</h3>
+        <div class="gallery gallery-two">
+          <figure><img src="dog_inpainted_Original.png" alt="Dog original" loading="lazy" /><figcaption>Dog Image, Original</figcaption></figure>
+          <figure><img src="dog_mask_Mask.png" alt="Dog mask" loading="lazy" /><figcaption>Dog Image, Mask</figcaption></figure>
+          <figure><img src="dog_mask_To Replace.png" alt="Dog to replace" loading="lazy" /><figcaption>Dog Image, To Replace</figcaption></figure>
+          <figure><img src="dog_inpainted_Inpainted.png" alt="Dog inpainted" loading="lazy" /><figcaption>Dog Image, Inpainted</figcaption></figure>
         </div>
-        <div class="gallery">
-          <figure><img src="car_edited_original.png" alt="Car original" loading="lazy" /><figcaption>Car original</figcaption></figure>
-          <figure><img src="car_edited_1.png" alt="Car i_start=1" loading="lazy" /><figcaption>i_start = 1</figcaption></figure>
-          <figure><img src="car_edited_3.png" alt="Car i_start=3" loading="lazy" /><figcaption>i_start = 3</figcaption></figure>
-          <figure><img src="car_edited_5.png" alt="Car i_start=5" loading="lazy" /><figcaption>i_start = 5</figcaption></figure>
-          <figure><img src="car_edited_7.png" alt="Car i_start=7" loading="lazy" /><figcaption>i_start = 7</figcaption></figure>
-          <figure><img src="car_edited_10.png" alt="Car i_start=10" loading="lazy" /><figcaption>i_start = 10</figcaption></figure>
-          <figure><img src="car_edited_20.png" alt="Car i_start=20" loading="lazy" /><figcaption>i_start = 20</figcaption></figure>
+
+        <h3>Charger Inpainting</h3>
+        <div class="gallery gallery-two">
+          <figure><img src="charger_inpainted_Original.png" alt="Charger original" loading="lazy" /><figcaption>Charger Image, Original</figcaption></figure>
+          <figure><img src="charger_mask_Mask.png" alt="Charger mask" loading="lazy" /><figcaption>Charger Image, Mask</figcaption></figure>
+          <figure><img src="charger_mask_To Replace.png" alt="Charger to replace" loading="lazy" /><figcaption>Charger Image, To Replace</figcaption></figure>
+          <figure><img src="charger_inpainted_Inpainted.png" alt="Charger inpainted" loading="lazy" /><figcaption>Charger Image, Inpainted</figcaption></figure>
         </div>
+
+        <h2>Part 1.7.3: Text-Conditional Image-to-image Translation</h2>
+        <p>This section is very similar to the image-to-image translation task. The only difference is that in this task, we use a custom textual prompt instead of a general prompt.</p>
+
+        <h3>Campanile with Text Prompt</h3>
         <div class="gallery">
-          <figure><img src="kiwi_edited_original.png" alt="Kiwi original" loading="lazy" /><figcaption>Kiwi original</figcaption></figure>
-          <figure><img src="kiwi_edited_1.png" alt="Kiwi i_start=1" loading="lazy" /><figcaption>i_start = 1</figcaption></figure>
-          <figure><img src="kiwi_edited_3.png" alt="Kiwi i_start=3" loading="lazy" /><figcaption>i_start = 3</figcaption></figure>
-          <figure><img src="kiwi_edited_5.png" alt="Kiwi i_start=5" loading="lazy" /><figcaption>i_start = 5</figcaption></figure>
-          <figure><img src="kiwi_edited_7.png" alt="Kiwi i_start=7" loading="lazy" /><figcaption>i_start = 7</figcaption></figure>
-          <figure><img src="kiwi_edited_10.png" alt="Kiwi i_start=10" loading="lazy" /><figcaption>i_start = 10</figcaption></figure>
-          <figure><img src="kiwi_edited_20.png" alt="Kiwi i_start=20" loading="lazy" /><figcaption>i_start = 20</figcaption></figure>
+          <figure><img src="campanile_edited_original.png" alt="Campanile original" loading="lazy" /><figcaption>Campanile, original</figcaption></figure>
+          <figure><img src="companile_transform_1.png" alt="Campanile transform i_start=1" loading="lazy" /><figcaption>Campanile, i_start = 1</figcaption></figure>
+          <figure><img src="companile_transform_3.png" alt="Campanile transform i_start=3" loading="lazy" /><figcaption>Campanile, i_start = 3</figcaption></figure>
+          <figure><img src="companile_transform_5.png" alt="Campanile transform i_start=5" loading="lazy" /><figcaption>Campanile, i_start = 5</figcaption></figure>
+          <figure><img src="companile_transform_7.png" alt="Campanile transform i_start=7" loading="lazy" /><figcaption>Campanile, i_start = 7</figcaption></figure>
+          <figure><img src="companile_transform_10.png" alt="Campanile transform i_start=10" loading="lazy" /><figcaption>Campanile, i_start = 10</figcaption></figure>
+          <figure><img src="companile_transform_20.png" alt="Campanile transform i_start=20" loading="lazy" /><figcaption>Campanile, i_start = 20</figcaption></figure>
+        </div>
+
+        <h3>Car with Text Prompt</h3>
+        <div class="gallery">
+          <figure><img src="car_edited_original.png" alt="Car original" loading="lazy" /><figcaption>Car, original</figcaption></figure>
+          <figure><img src="car_edited_1.png" alt="Car i_start=1" loading="lazy" /><figcaption>Car, i_start = 1</figcaption></figure>
+          <figure><img src="car_edited_3.png" alt="Car i_start=3" loading="lazy" /><figcaption>Car, i_start = 3</figcaption></figure>
+          <figure><img src="car_edited_5.png" alt="Car i_start=5" loading="lazy" /><figcaption>Car, i_start = 5</figcaption></figure>
+          <figure><img src="car_edited_7.png" alt="Car i_start=7" loading="lazy" /><figcaption>Car, i_start = 7</figcaption></figure>
+          <figure><img src="car_edited_10.png" alt="Car i_start=10" loading="lazy" /><figcaption>Car, i_start = 10</figcaption></figure>
+          <figure><img src="car_edited_20.png" alt="Car i_start=20" loading="lazy" /><figcaption>Car, i_start = 20</figcaption></figure>
+        </div>
+
+        <h3>Kiwi with Text Prompt</h3>
+        <div class="gallery">
+          <figure><img src="kiwi_edited_original.png" alt="Kiwi original" loading="lazy" /><figcaption>Kiwi, original</figcaption></figure>
+          <figure><img src="kiwi_edited_1.png" alt="Kiwi i_start=1" loading="lazy" /><figcaption>Kiwi, i_start = 1</figcaption></figure>
+          <figure><img src="kiwi_edited_3.png" alt="Kiwi i_start=3" loading="lazy" /><figcaption>Kiwi, i_start = 3</figcaption></figure>
+          <figure><img src="kiwi_edited_5.png" alt="Kiwi i_start=5" loading="lazy" /><figcaption>Kiwi, i_start = 5</figcaption></figure>
+          <figure><img src="kiwi_edited_7.png" alt="Kiwi i_start=7" loading="lazy" /><figcaption>Kiwi, i_start = 7</figcaption></figure>
+          <figure><img src="kiwi_edited_10.png" alt="Kiwi i_start=10" loading="lazy" /><figcaption>Kiwi, i_start = 10</figcaption></figure>
+          <figure><img src="kiwi_edited_20.png" alt="Kiwi i_start=20" loading="lazy" /><figcaption>Kiwi, i_start = 20</figcaption></figure>
         </div>
       </section>
 
+      <!-- Part 1.8 and 1.9 -->
       <section id="part18">
         <h2>Part 1.8: Visual Anagrams</h2>
-        <p>Combine normal and flipped noise predictions to form flip illusions guided by two prompts.</p>
+        <p>This section implements the visual anagrams. In every denoising step, we predict the normal noise and we also predict the noise flipped based on the flipped prompt. We then simply flip the flipped noise back and add them together to get our final predicted noise.</p>
         <div class="gallery">
-          <figure><img src="flip_illusion_campfire_skull.png" alt="Flip illusion campfire skull" loading="lazy" /><figcaption>Campfire ↔ Skull</figcaption></figure>
-          <figure><img src="flip_illusion_old_man_campfire.png" alt="Flip illusion old man campfire" loading="lazy" /><figcaption>Old man ↔ Campfire</figcaption></figure>
-          <figure><img src="flip_illusion_old_man_village.png" alt="Flip illusion old man village" loading="lazy" /><figcaption>Old man ↔ Village</figcaption></figure>
-        </div>
-
-        <h2>Part 1.9: Hybrid Images</h2>
-        <p>Blend predicted low- and high-frequency noise components to create hybrids.</p>
-        <div class="gallery">
-          <figure><img src="hybrid_campfire_skull.png" alt="Hybrid campfire skull" loading="lazy" /><figcaption>Campfire + Skull</figcaption></figure>
-          <figure><img src="hybrid_rocket_ship_pencil.png" alt="Hybrid rocket ship pencil" loading="lazy" /><figcaption>Rocket ship + Pencil</figcaption></figure>
-          <figure><img src="hybrid_skull_waterfalls.png" alt="Hybrid skull waterfalls" loading="lazy" /><figcaption>Skull + Waterfalls</figcaption></figure>
-        </div>
-      </section>
-
-      <section id="partb">
-        <h2>Part B.1.1–B.1.2: UNet and Noisy Images</h2>
-        <p>Gaussian noise added at multiple levels; visualize noisy inputs.</p>
-        <div class="gallery gallery-small">
           <figure>
-            <img src="noisy_images.png" alt="Noisy images visualization" loading="lazy" />
-            <figcaption>Noisy images across noise levels.</figcaption>
+            <img src="flip_illusion_campfire_skull.png" alt="Flip illusion campfire skull" loading="lazy" />
+            <figcaption>Flip Illusion, Campfire + Skull</figcaption>
+          </figure>
+          <figure>
+            <img src="flip_illusion_old_man_campfire.png" alt="Flip illusion old man campfire" loading="lazy" />
+            <figcaption>Flip Illusion, Old Man + Campfire</figcaption>
+          </figure>
+          <figure>
+            <img src="flip_illusion_old_man_village.png" alt="Flip illusion old man village" loading="lazy" />
+            <figcaption>Flip Illusion, Old Man + Village</figcaption>
           </figure>
         </div>
 
-        <h2>Part B.1.2.1: Training UNet</h2>
-        <p>UNet trained on MNIST at noise level 0.5; losses and denoising snapshots over epochs.</p>
-        <div class="gallery gallery-two">
-          <figure><img src="training_curve.png" alt="Training loss curve" loading="lazy" /><figcaption>Training loss</figcaption></figure>
-          <figure><img src="denoising_grid.png" alt="Denoising grid" loading="lazy" /><figcaption>Denoised outputs vs noise.</figcaption></figure>
+        <h2>Part 1.9: Hybrid Images</h2>
+        <p>This section implements hybrid images. This is done by predicting noises both in the low frequency and the high frequency domains. We then add them together to get our final noise.</p>
+        <div class="gallery">
+          <figure>
+            <img src="hybrid_campfire_skull.png" alt="Hybrid campfire skull" loading="lazy" />
+            <figcaption>Hybrid Images, Campfire + Skull</figcaption>
+          </figure>
+          <figure>
+            <img src="hybrid_rocket_ship_pencil.png" alt="Hybrid rocket ship pencil" loading="lazy" />
+            <figcaption>Hybrid Images, Rocket Ship + Pencil</figcaption>
+          </figure>
+          <figure>
+            <img src="hybrid_skull_waterfalls.png" alt="Hybrid skull waterfalls" loading="lazy" />
+            <figcaption>Hybrid Images, Skull + Waterfalls</figcaption>
+          </figure>
         </div>
+      </section>
+
+      <!-- Part B.1 -->
+      <section id="partb1">
+        <h2>Part B.1.1 and Part B.1.2.0: Implement the UNet and Visualizing the Noisy Images</h2>
+        <p>We add Gaussian noise to the image, specified by the noise level. The following images are examples of the noisy images with different noise levels.</p>
+        <div class="gallery gallery-small">
+          <figure>
+            <img src="noisy_images.png" alt="Noisy images visualization" loading="lazy" />
+            <figcaption>Visualization of the Noisy Images</figcaption>
+          </figure>
+        </div>
+
+        <h2>Part B.1.2.1: Training</h2>
+        <p>The UNet is trained on the MNIST dataset with a noise level of 0.5. Here is the training loss curve and the visualization of denoised images after the first and the final epoch.</p>
         <div class="gallery gallery-two">
-          <figure><img src="pure_noise_denoising.png" alt="Pure noise denoising" loading="lazy" /><figcaption>Pure noise denoising.</figcaption></figure>
-          <figure><img src="ood_testing.png" alt="OOD testing" loading="lazy" /><figcaption>Performance on OOD noise.</figcaption></figure>
+          <figure>
+            <img src="training_curve.png" alt="Training loss curve" loading="lazy" />
+            <figcaption>Training Loss Curve</figcaption>
+          </figure>
+          <figure>
+            <img src="denoising_grid.png" alt="Denoising grid" loading="lazy" />
+            <figcaption>Comparison between the denoised image after the first and the final epoch</figcaption>
+          </figure>
+        </div>
+
+        <h2>Part B.1.2.2: Out-of-Distribution Testing</h2>
+        <p>This section tests the trained UNet's performance on out-of-distribution data, ie. images with different noise levels. With a larger noise level, the denoising performance seems to drop, which makes sense since the model is not trained on such levels.</p>
+        <div class="gallery gallery-small">
+          <figure>
+            <img src="ood_testing.png" alt="OOD testing" loading="lazy" />
+            <figcaption>Performance of the denoiser on OOD noise levels</figcaption>
+          </figure>
         </div>
 
         <h2>Part B.1.2.3: Denoising Pure Noise</h2>
+        <p>This section trains a UNet to denoise a pure noise. Since the training is not conditioned on the classes, we expect the model to output images that don't look like actual numbers.</p>
+        <div class="gallery gallery-two">
+          <figure>
+            <img src="training_curve_pure_noise.png" alt="Training curve pure noise" loading="lazy" />
+            <figcaption>Training Loss Curve for the UNet Trained for Denoising Pure Noises</figcaption>
+          </figure>
+          <figure>
+            <img src="pure_noise_denoising.png" alt="Pure noise denoising" loading="lazy" />
+            <figcaption>Sampled Results on Pure Noise for the Model after the First and the Final epoch</figcaption>
+          </figure>
+        </div>
+        <p>Notice that the outputted images have features of different numbers in the training dataset. This is because the training is not conditioned on classes; therefore, pure noise can be denoised to any number during the training process.</p>
+      </section>
+
+      <!-- Part B.2 -->
+      <section id="partb2">
+        <h2>Part B.2: Training a Flow Matching Model</h2>
+        <p>The one-step denoiser doesn't work well. Therefore, we want to train a denoiser that iteratively denoise the pure noises. We choose to implement the flow matching model in the following sections. We will start with time and class conditioned UNet implementations.</p>
+
+        <h2>Part B.2.1 and Part B.2.2: Adding Time Conditioning to UNet and Training the UNet</h2>
+        <p>We implement the fully connected block and pass the conditioned time variable before the concatenations. The training loss curve is presented below.</p>
         <div class="gallery gallery-small">
-          <figure><img src="training_curve_pure_noise.png" alt="Training curve pure noise" loading="lazy" /><figcaption>Training curve for pure-noise denoiser.</figcaption></figure>
+          <figure>
+            <img src="training_curve_time_conditioned.png" alt="Time-conditioned training" loading="lazy" />
+            <figcaption>Training Loss Curve for the Time-Conditioned UNet</figcaption>
+          </figure>
         </div>
 
-        <h2>Part B.2: Flow Matching Model</h2>
-        <p>Time- and class-conditioned UNets; sampling progression across epochs.</p>
-        <div class="gallery gallery-two">
-          <figure><img src="training_curve_time_conditioned.png" alt="Time-conditioned training" loading="lazy" /><figcaption>Time-conditioned UNet training.</figcaption></figure>
-          <figure><img src="time_conditioned_sampling.png" alt="Time-conditioned sampling" loading="lazy" /><figcaption>Samples across epochs.</figcaption></figure>
+        <h2>Part B.2.3: Sampling from the UNet</h2>
+        <p>The following images demonstrate the denoising effects from the trained model after the first, fifth, and the final epoch.</p>
+        <div class="gallery gallery-small">
+          <figure>
+            <img src="time_conditioned_sampling.png" alt="Time-conditioned sampling" loading="lazy" />
+            <figcaption>Sampled Results from the Time-Conditioned UNet</figcaption>
+          </figure>
         </div>
-        <div class="gallery gallery-two">
-          <figure><img src="training_curve_class_conditioned.png" alt="Class-conditioned training" loading="lazy" /><figcaption>Class-conditioned UNet training.</figcaption></figure>
-          <figure><img src="class_samples_epoch0.png" alt="Class samples epoch 0" loading="lazy" /><figcaption>Class-conditioned samples, epoch 0.</figcaption></figure>
+
+        <h2>Part B.2.4 and Part B.2.5: Adding Class-Conditioning to UNet and Training the UNet</h2>
+        <p>To better generate number images, we can further condition the UNet on the classes. The condition is also added with a fully connected block. Below is the training loss curve of the class-conditioned UNet.</p>
+        <div class="gallery gallery-small">
+          <figure>
+            <img src="training_curve_class_conditioned.png" alt="Class-conditioned training" loading="lazy" />
+            <figcaption>Training Loss Curve for the Class-Conditioned UNet</figcaption>
+          </figure>
         </div>
-        <div class="gallery gallery-two">
-          <figure><img src="class_samples_epochHalf.png" alt="Class samples mid" loading="lazy" /><figcaption>Class-conditioned samples, mid training.</figcaption></figure>
-          <figure><img src="class_samples_epochFinal.png" alt="Class samples final" loading="lazy" /><figcaption>Class-conditioned samples, final.</figcaption></figure>
+
+        <h2>Part B.2.6: Sampling from the UNet</h2>
+        <p>The following images demonstrate the denoising effects from the trained class-conditioned UNet after the first, fifth, and the final epoch. The more the training steps, the better the sampled results.</p>
+        <div class="gallery">
+          <figure>
+            <img src="class_samples_epoch0.png" alt="Class samples epoch 0" loading="lazy" />
+            <figcaption>Sampled Results of the Class-Conditioned Unet after the First Epoch</figcaption>
+          </figure>
+          <figure>
+            <img src="class_samples_epochHalf.png" alt="Class samples mid" loading="lazy" />
+            <figcaption>Sampled Results of the Class-Conditioned Unet after the Fifth Epoch</figcaption>
+          </figure>
+          <figure>
+            <img src="class_samples_epochFinal.png" alt="Class samples final" loading="lazy" />
+            <figcaption>Sampled Results of the Class-Conditioned Unet after the Final Epoch</figcaption>
+          </figure>
         </div>
+
+        <p>To keep the training process simple, we can get rid of the scheduler and use a constant learning rate instead (perhaps with a smaller learning rate and more training steps). I choose to train the model with a constant learning rate of 1e-3 for 20 epochs. The following images demonstrate the training and sampled results.</p>
         <div class="gallery gallery-two">
-          <figure><img src="training_curve_class_conditioned_no_scheduler.png" alt="Class-conditioned no scheduler" loading="lazy" /><figcaption>Constant LR training.</figcaption></figure>
-          <figure><img src="class_samples_epochFinal_no_scheduler.png" alt="Class samples final no scheduler" loading="lazy" /><figcaption>Final samples without scheduler.</figcaption></figure>
+          <figure>
+            <img src="training_curve_class_conditioned_no_scheduler.png" alt="Class-conditioned no scheduler" loading="lazy" />
+            <figcaption>Training Loss Curve for the Class-Conditioned UNet without the Scheduler</figcaption>
+          </figure>
+          <figure>
+            <img src="class_samples_epochFinal_no_scheduler.png" alt="Class samples final no scheduler" loading="lazy" />
+            <figcaption>Sampled Results of the Class-Conditioned Unet after the Final Epoch without the Scheduler</figcaption>
+          </figure>
         </div>
       </section>
     </div>
