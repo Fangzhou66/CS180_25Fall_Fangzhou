@@ -398,27 +398,75 @@
       figure {
         break-inside: avoid;
         page-break-inside: avoid;
-        display: inline-block;
-        max-width: 200px;
-        margin: 8px;
         box-shadow: none;
       }
-      figure img {
-        max-height: 150px;
+      /* 普通 gallery 中的小图 */
+      .gallery figure {
+        display: inline-block;
+        max-width: 180px;
+        margin: 6px;
+      }
+      .gallery figure img {
+        max-height: 140px;
         width: auto;
+        object-fit: contain;
+      }
+      /* wide 图片保持大尺寸 */
+      .gallery-wide figure,
+      .gallery figure.wide,
+      .gallery-small figure {
+        display: block;
+        max-width: 100%;
+        margin: 12px auto;
+      }
+      .gallery-wide figure img,
+      .gallery figure.wide img,
+      .gallery-small figure img {
+        max-height: none;
+        width: 100%;
+        max-width: 600px;
+      }
+      /* row gallery 中的小图 */
+      .gallery-row figure,
+      .gallery-row-4 figure,
+      .gallery-row-6 figure {
+        display: inline-block;
+        max-width: 120px;
+        margin: 4px;
+      }
+      .gallery-row figure img,
+      .gallery-row-4 figure img,
+      .gallery-row-6 figure img {
+        max-height: 100px;
+        width: auto;
+        object-fit: contain;
+      }
+      /* gallery-two 保持两列，适中大小 */
+      .gallery-two figure {
+        display: inline-block;
+        max-width: 45%;
+        margin: 8px;
+      }
+      .gallery-two figure img {
+        max-height: 280px;
+        width: 100%;
         object-fit: contain;
       }
       .gallery,
       .gallery-row,
       .gallery-row-4,
-      .gallery-row-6 {
+      .gallery-row-6,
+      .gallery-two {
         display: flex;
         flex-wrap: wrap;
-        justify-content: flex-start;
-        gap: 10px;
+        justify-content: center;
+        gap: 8px;
+      }
+      .gallery-wide,
+      .gallery-small {
+        display: block;
       }
       section {
-        break-inside: avoid-page;
         page-break-inside: auto;
         box-shadow: none;
         animation: none;
