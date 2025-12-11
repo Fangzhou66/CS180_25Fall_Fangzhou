@@ -424,6 +424,42 @@
       .formula::before { display: none; }
     }
 
+    /* ===== Print Layout ===== */
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-size: 12pt;
+        line-height: 1.55;
+      }
+      header {
+        background: none !important;
+        padding: 24px 0 18px;
+        color: #000000;
+      }
+      header::before,
+      header::after { display: none !important; }
+      .layout {
+        display: block !important;
+        max-width: none !important;
+        padding: 0 !important;
+      }
+      .side-nav,
+      .back-top { display: none !important; }
+      main { padding: 0 !important; }
+      main .container { max-width: none !important; }
+      section {
+        box-shadow: none !important;
+        border: 1px solid #d0d0d0 !important;
+        page-break-inside: avoid;
+      }
+      figure {
+        box-shadow: none !important;
+        border: 1px solid #e0e0e0 !important;
+      }
+      a { color: #000000 !important; text-decoration: underline; }
+    }
+
     /* ===== Back to Top Button ===== */
     .back-top {
       position: fixed;
