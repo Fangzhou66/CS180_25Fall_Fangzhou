@@ -483,12 +483,12 @@
         <p>The UNet is trained on the MNIST dataset with a noise level of 0.5. Here is the training loss curve and the visualization of denoised images after the first and the final epoch.</p>
         <div class="gallery gallery-two">
           <figure>
-            <img src="training_curve.png" alt="Training loss curve" loading="lazy" />
-            <figcaption>Training Loss Curve</figcaption>
-          </figure>
-          <figure>
             <img src="ood_testing.png" alt="Denoising comparison" loading="lazy" />
             <figcaption>Comparison between the denoised image after the first and the final epoch</figcaption>
+          </figure>
+          <figure>
+            <img src="training_curve.png" alt="Training loss curve" loading="lazy" />
+            <figcaption>Training Loss Curve</figcaption>
           </figure>
         </div>
 
@@ -505,12 +505,12 @@
         <p>This section trains a UNet to denoise a pure noise. Since the training is not conditioned on the classes, we expect the model to output images that don't look like actual numbers.</p>
         <div class="gallery gallery-two">
           <figure>
-            <img src="training_curve_pure_noise.png" alt="Training curve pure noise" loading="lazy" />
-            <figcaption>Training Loss Curve for the UNet Trained for Denoising Pure Noises</figcaption>
-          </figure>
-          <figure>
             <img src="pure_noise_denoising.png" alt="Pure noise denoising" loading="lazy" />
             <figcaption>Sampled Results on Pure Noise for the Model after the First and the Final epoch</figcaption>
+          </figure>
+          <figure>
+            <img src="training_curve_pure_noise.png" alt="Training curve pure noise" loading="lazy" />
+            <figcaption>Training Loss Curve for the UNet Trained for Denoising Pure Noises</figcaption>
           </figure>
         </div>
         <p>Notice that the outputted images have features of different numbers in the training dataset. This is because the training is not conditioned on classes; therefore, pure noise can be denoised to any number during the training process.</p>
@@ -523,32 +523,31 @@
 
         <h2>Part B.2.1 and Part B.2.2: Adding Time Conditioning to UNet and Training the UNet</h2>
         <p>We implement the fully connected block and pass the conditioned time variable before the concatenations. The training loss curve is presented below.</p>
-        <div class="gallery gallery-small">
+        <div class="gallery gallery-two">
+          <figure>
+            <img src="time_conditioned_sampling.png" alt="Time-conditioned sampling" loading="lazy" />
+            <figcaption>Sampled Results from the Time-Conditioned UNet</figcaption>
+          </figure>
           <figure>
             <img src="training_curve_time_conditioned.png" alt="Time-conditioned training" loading="lazy" />
             <figcaption>Training Loss Curve for the Time-Conditioned UNet</figcaption>
           </figure>
         </div>
 
-        <h2>Part B.2.3: Sampling from the UNet</h2>
-        <p>The following images demonstrate the denoising effects from the trained model after the first, fifth, and the final epoch.</p>
-        <div class="gallery gallery-small">
-          <figure>
-            <img src="time_conditioned_sampling.png" alt="Time-conditioned sampling" loading="lazy" />
-            <figcaption>Sampled Results from the Time-Conditioned UNet</figcaption>
-          </figure>
-        </div>
-
-        <h2>Part B.2.4 and Part B.2.5: Adding Class-Conditioning to UNet and Training the UNet</h2>
+        <h2>Part B.2.3 and Part B.2.4: Adding Class-Conditioning to UNet and Training the UNet</h2>
         <p>To better generate number images, we can further condition the UNet on the classes. The condition is also added with a fully connected block. Below is the training loss curve of the class-conditioned UNet.</p>
-        <div class="gallery gallery-small">
+        <div class="gallery gallery-two">
+          <figure>
+            <img src="class_samples_epochFinal.png" alt="Class samples final" loading="lazy" />
+            <figcaption>Sampled Results of the Class-Conditioned Unet after the Final Epoch</figcaption>
+          </figure>
           <figure>
             <img src="training_curve_class_conditioned.png" alt="Class-conditioned training" loading="lazy" />
             <figcaption>Training Loss Curve for the Class-Conditioned UNet</figcaption>
           </figure>
         </div>
 
-        <h2>Part B.2.6: Sampling from the UNet</h2>
+        <h2>Part B.2.5: Sampling from the UNet</h2>
         <p>The following images demonstrate the denoising effects from the trained class-conditioned UNet after the first, fifth, and the final epoch. The more the training steps, the better the sampled results.</p>
         <div class="gallery">
           <figure>
@@ -568,12 +567,12 @@
         <p>To keep the training process simple, we can get rid of the scheduler and use a constant learning rate instead (perhaps with a smaller learning rate and more training steps). I choose to train the model with a constant learning rate of 1e-3 for 20 epochs. The following images demonstrate the training and sampled results.</p>
         <div class="gallery gallery-two">
           <figure>
-            <img src="training_curve_class_conditioned_no_scheduler.png" alt="Class-conditioned no scheduler" loading="lazy" />
-            <figcaption>Training Loss Curve for the Class-Conditioned UNet without the Scheduler</figcaption>
-          </figure>
-          <figure>
             <img src="class_samples_epochFinal_no_scheduler.png" alt="Class samples final no scheduler" loading="lazy" />
             <figcaption>Sampled Results of the Class-Conditioned Unet after the Final Epoch without the Scheduler</figcaption>
+          </figure>
+          <figure>
+            <img src="training_curve_class_conditioned_no_scheduler.png" alt="Class-conditioned no scheduler" loading="lazy" />
+            <figcaption>Training Loss Curve for the Class-Conditioned UNet without the Scheduler</figcaption>
           </figure>
         </div>
       </section>
