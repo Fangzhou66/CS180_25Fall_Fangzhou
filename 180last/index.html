@@ -627,7 +627,11 @@
       <!-- Part B.1 -->
       <section id="partb1">
         <h2>Part B.1.1 and Part B.1.2.0: Implement the UNet and Visualizing the Noisy Images</h2>
-        <p>We add Gaussian noise to the image, specified by the noise level. The following images are examples of the noisy images with different noise levels.</p>
+        <p>We implement a UNet architecture for denoising MNIST digits. The noising process adds Gaussian noise to clean images:</p>
+        <div class="formula">
+          <p>\[ z = x + \sigma \epsilon, \quad \text{where } \epsilon \sim \mathcal{N}(0, I) \]</p>
+        </div>
+        <p>Here \(\sigma\) is the noise level (standard deviation). The following images show examples at different noise levels from 0.0 to 1.0.</p>
         <div class="gallery gallery-small">
           <figure>
             <img src="noisy_images.png" alt="Noisy images visualization" loading="lazy" />
@@ -636,7 +640,11 @@
         </div>
 
         <h2>Part B.1.2.1: Training</h2>
-        <p>The UNet is trained on the MNIST dataset with a noise level of 0.5. Here is the training loss curve and the visualization of denoised images after the first and the final epoch.</p>
+        <p>The UNet is trained on the MNIST dataset with a fixed noise level \(\sigma = 0.5\). We optimize the L2 loss between the denoised output and the clean image:</p>
+        <div class="formula">
+          <p>\[ \mathcal{L} = \mathbb{E}_{z,x} \| D_\theta(z) - x \|^2 \]</p>
+        </div>
+        <p>where \(D_\theta\) is our denoiser network. Below are the training loss curve and the denoised results after the first and final epochs.</p>
         <div class="gallery gallery-two">
           <figure>
             <img src="ood_testing.png" alt="Denoising comparison" loading="lazy" />
@@ -675,14 +683,23 @@
       <!-- Part B.2 -->
       <section id="partb2">
         <h2>Part B.2: Training a Flow Matching Model</h2>
-        <p>The one-step denoiser doesn't work well. Therefore, we want to train a denoiser that iteratively denoise the pure noises. We choose to implement the flow matching model, which learns to predict the velocity field that transforms noise into data:</p>
+        <p>The one-step denoiser doesn't work well for pure noise. Therefore, we implement a flow matching model that iteratively transforms noise into clean images. The key idea is to learn a velocity field that describes how to move from noise to data.</p>
+        <p>We define an interpolation between noise \(x_0 \sim \mathcal{N}(0, I)\) and clean data \(x_1\):</p>
         <div class="formula">
-          <p>\[ x_t = (1 - t) x_0 + t \epsilon, \quad v_t = \epsilon - x_0 \]</p>
+          <p>\[ x_t = (1 - t) x_0 + t \cdot x_1, \quad t \in [0, 1] \]</p>
         </div>
-        <p>where \(x_0\) is the clean image, \(\epsilon\) is noise, and \(v_t\) is the velocity we train the model to predict. During sampling, we integrate this velocity field to transform pure noise into clean images.</p>
+        <p>The velocity (or flow) at any point is simply:</p>
+        <div class="formula">
+          <p>\[ v_t = \frac{d}{dt} x_t = x_1 - x_0 \]</p>
+        </div>
+        <p>We train the network \(u_\theta\) to predict this velocity using the flow matching loss:</p>
+        <div class="formula">
+          <p>\[ \mathcal{L}_{\text{FM}} = \mathbb{E}_{t, x_0, x_1} \| u_\theta(x_t, t) - (x_1 - x_0) \|^2 \]</p>
+        </div>
+        <p>During sampling, we start from pure noise \(x_0\) and iteratively apply the predicted velocity to reach the clean image.</p>
 
         <h2>Part B.2.1 and Part B.2.2: Adding Time Conditioning to UNet and Training the UNet</h2>
-        <p>We implement the fully connected block and pass the conditioned time variable before the concatenations. The training loss curve is presented below.</p>
+        <p>To enable the UNet to handle different timesteps, we add time conditioning. The scalar \(t \in [0, 1]\) is embedded via fully-connected blocks (FCBlocks) and used to modulate the intermediate feature maps. This allows the network to learn different behaviors at different points along the flow trajectory.</p>
         <div class="gallery gallery-two">
           <figure>
             <img src="time_conditioned_sampling.png" alt="Time-conditioned sampling" loading="lazy" />
@@ -695,7 +712,7 @@
         </div>
 
         <h2>Part B.2.3 and Part B.2.4: Adding Class-Conditioning to UNet and Training the UNet</h2>
-        <p>To better generate number images, we can further condition the UNet on the classes. The condition is also added with a fully connected block. Below is the training loss curve of the class-conditioned UNet.</p>
+        <p>To generate specific digit classes, we add class conditioning using one-hot encoded class vectors \(c\). Similar to time conditioning, the class embedding is processed through FCBlocks and combined with the features. The network now takes both time and class as input: \(u_\theta(x_t, c, t)\). This enables controllable generation of specific digits (0-9).</p>
         <div class="gallery gallery-two">
           <figure>
             <img src="class_samples_epochFinal.png" alt="Class samples final" loading="lazy" />
@@ -708,7 +725,11 @@
         </div>
 
         <h2>Part B.2.5: Sampling from the UNet</h2>
-        <p>The following images demonstrate the denoising effects from the trained class-conditioned UNet after the first, fifth, and the final epoch. The more the training steps, the better the sampled results.</p>
+        <p>To generate images, we start with pure noise \(x_0 \sim \mathcal{N}(0, I)\) and iteratively apply the predicted velocity over \(T\) steps:</p>
+        <div class="formula">
+          <p>\[ x_{t+\Delta t} = x_t + \Delta t \cdot u_\theta(x_t, c, t) \]</p>
+        </div>
+        <p>The following images demonstrate the generation quality after the first, fifth, and final epochs. More training leads to better digit generation.</p>
         <div class="gallery">
           <figure>
             <img src="class_samples_epoch0.png" alt="Class samples epoch 0" loading="lazy" />
