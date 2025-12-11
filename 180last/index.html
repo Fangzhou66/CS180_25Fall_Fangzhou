@@ -327,8 +327,8 @@
     /* Row galleries */
     .gallery-row {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 12px;
       margin: 28px 0 16px;
     }
     .gallery-row-4 {
@@ -339,8 +339,8 @@
     }
     .gallery-row-6 {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 12px;
       margin: 28px 0 16px;
     }
 
@@ -412,7 +412,9 @@
       .layout main { padding-top: 24px; }
     }
     @media (max-width: 900px) {
+      .gallery-row { grid-template-columns: repeat(4, 1fr); }
       .gallery-row-4 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+      .gallery-row-6 { grid-template-columns: repeat(3, 1fr); }
     }
     @media (max-width: 640px) {
       header { padding: 60px 20px 70px; }
@@ -636,7 +638,7 @@
 
       <!-- Part 1.7 -->
       <section id="part17">
-        <h2>Part 1.7.1: Image-to-Image Translation (SDEdit)</h2>
+        <h2>Part 1.7.1:&nbsp;Image-to-Image Translation (SDEdit)</h2>
         <p>SDEdit allows us to edit images by adding noise and then denoising with a text prompt. The parameter <code>i_start</code> controls how much noise is added: lower values preserve more of the original image structure, while higher values allow more creative freedom. We apply this technique to the Campanile, a web image, and two hand-drawn sketches.</p>
 
         <h3>Campanile Image</h3>
@@ -714,7 +716,7 @@
           <figure><img src="charger_inpainted_Inpainted.png" alt="Charger inpainted" loading="lazy" /><figcaption>Inpainted</figcaption></figure>
         </div>
 
-        <h2>Part 1.7.3: Text-Conditional Image-to-image Translation</h2>
+        <h2>Part 1.7.3:&nbsp;Text-Conditional Image-to-image Translation</h2>
         <p>This extends SDEdit by using specific text prompts to guide the translation. Instead of the generic "a high quality photo" prompt, we provide descriptive prompts that transform the image toward a target concept while preserving the underlying structure. The process is the same as Part 1.7.1, but with targeted prompts that steer the generation in a specific semantic direction.</p>
 
         <h3>Campanile with Text Prompt</h3>
@@ -753,7 +755,7 @@
 
       <!-- Part 1.8 and 1.9 -->
       <section id="part18">
-        <h2>Part 1.8: Visual Anagrams</h2>
+        <h2>Part 1.8:&nbsp;Visual Anagrams</h2>
         <p>Visual anagrams are images that look like different things when flipped upside down. To create these, we simultaneously denoise toward two different prompts - one for the upright view and one for the flipped view. At each denoising step:</p>
         <div class="formula">
           <p>\[ \epsilon_1 = \text{UNet}(x_t, t, p_1) \]</p>
