@@ -124,6 +124,14 @@
     }
     .gallery-row-4 figure { box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06); }
     .gallery-row-4 figcaption { padding: 10px 8px 12px; font-size: 13px; text-align: center; }
+    .gallery-row-6 {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 14px;
+      margin: 20px 0 8px;
+    }
+    .gallery-row-6 figure { box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06); }
+    .gallery-row-6 figcaption { padding: 10px 8px 12px; font-size: 12px; text-align: center; }
     figure {
       margin: 0;
       background: #ffffff;
@@ -325,26 +333,26 @@
           <figure><img src="tom_and_jerry.png" alt="Tom and Jerry original" loading="lazy" /><figcaption>original</figcaption></figure>
         </div>
 
-        <h3>Drawn Cat</h3>
+        <h3>Hand-drawn House</h3>
         <div class="gallery-row">
-          <figure><img src="drawn_cat_1.png" alt="Drawn cat i_start=1" loading="lazy" /><figcaption>i_start = 1</figcaption></figure>
-          <figure><img src="drawn_cat_3.png" alt="Drawn cat i_start=3" loading="lazy" /><figcaption>i_start = 3</figcaption></figure>
-          <figure><img src="drawn_cat_5.png" alt="Drawn cat i_start=5" loading="lazy" /><figcaption>i_start = 5</figcaption></figure>
-          <figure><img src="drawn_cat_7.png" alt="Drawn cat i_start=7" loading="lazy" /><figcaption>i_start = 7</figcaption></figure>
-          <figure><img src="drawn_cat_10.png" alt="Drawn cat i_start=10" loading="lazy" /><figcaption>i_start = 10</figcaption></figure>
-          <figure><img src="drawn_cat_20.png" alt="Drawn cat i_start=20" loading="lazy" /><figcaption>i_start = 20</figcaption></figure>
-          <figure><img src="drawn_cat.png" alt="Drawn cat original" loading="lazy" /><figcaption>original</figcaption></figure>
+          <figure><img src="drawn_cat_1.png" alt="Hand-drawn house i_start=1" loading="lazy" /><figcaption>i_start = 1</figcaption></figure>
+          <figure><img src="drawn_cat_3.png" alt="Hand-drawn house i_start=3" loading="lazy" /><figcaption>i_start = 3</figcaption></figure>
+          <figure><img src="drawn_cat_5.png" alt="Hand-drawn house i_start=5" loading="lazy" /><figcaption>i_start = 5</figcaption></figure>
+          <figure><img src="drawn_cat_7.png" alt="Hand-drawn house i_start=7" loading="lazy" /><figcaption>i_start = 7</figcaption></figure>
+          <figure><img src="drawn_cat_10.png" alt="Hand-drawn house i_start=10" loading="lazy" /><figcaption>i_start = 10</figcaption></figure>
+          <figure><img src="drawn_cat_20.png" alt="Hand-drawn house i_start=20" loading="lazy" /><figcaption>i_start = 20</figcaption></figure>
+          <figure><img src="drawn_cat.png" alt="Hand-drawn house original" loading="lazy" /><figcaption>original</figcaption></figure>
         </div>
 
-        <h3>Drawn Doraemon</h3>
+        <h3>Hand-drawn Smiley Face</h3>
         <div class="gallery-row">
-          <figure><img src="drawn_doraemon_1.png" alt="Drawn Doraemon i_start=1" loading="lazy" /><figcaption>i_start = 1</figcaption></figure>
-          <figure><img src="drawn_doraemon_3.png" alt="Drawn Doraemon i_start=3" loading="lazy" /><figcaption>i_start = 3</figcaption></figure>
-          <figure><img src="drawn_doraemon_5.png" alt="Drawn Doraemon i_start=5" loading="lazy" /><figcaption>i_start = 5</figcaption></figure>
-          <figure><img src="drawn_doraemon_7.png" alt="Drawn Doraemon i_start=7" loading="lazy" /><figcaption>i_start = 7</figcaption></figure>
-          <figure><img src="drawn_doraemon_10.png" alt="Drawn Doraemon i_start=10" loading="lazy" /><figcaption>i_start = 10</figcaption></figure>
-          <figure><img src="drawn_doraemon_20.png" alt="Drawn Doraemon i_start=20" loading="lazy" /><figcaption>i_start = 20</figcaption></figure>
-          <figure><img src="drawn_doraemon.png" alt="Drawn Doraemon original" loading="lazy" /><figcaption>original</figcaption></figure>
+          <figure><img src="drawn_doraemon_1.png" alt="Hand-drawn smiley face i_start=1" loading="lazy" /><figcaption>i_start = 1</figcaption></figure>
+          <figure><img src="drawn_doraemon_3.png" alt="Hand-drawn smiley face i_start=3" loading="lazy" /><figcaption>i_start = 3</figcaption></figure>
+          <figure><img src="drawn_doraemon_5.png" alt="Hand-drawn smiley face i_start=5" loading="lazy" /><figcaption>i_start = 5</figcaption></figure>
+          <figure><img src="drawn_doraemon_7.png" alt="Hand-drawn smiley face i_start=7" loading="lazy" /><figcaption>i_start = 7</figcaption></figure>
+          <figure><img src="drawn_doraemon_10.png" alt="Hand-drawn smiley face i_start=10" loading="lazy" /><figcaption>i_start = 10</figcaption></figure>
+          <figure><img src="drawn_doraemon_20.png" alt="Hand-drawn smiley face i_start=20" loading="lazy" /><figcaption>i_start = 20</figcaption></figure>
+          <figure><img src="drawn_doraemon.png" alt="Hand-drawn smiley face original" loading="lazy" /><figcaption>original</figcaption></figure>
         </div>
 
         <h2>Part 1.7.2: Inpainting</h2>
@@ -415,18 +423,30 @@
       <section id="part18">
         <h2>Part 1.8: Visual Anagrams</h2>
         <p>This section implements the visual anagrams. In every denoising step, we predict the normal noise and we also predict the noise flipped based on the flipped prompt. We then simply flip the flipped noise back and add them together to get our final predicted noise.</p>
-        <div class="gallery">
+        <div class="gallery-row-6">
           <figure>
             <img src="flip_illusion_campfire_skull.png" alt="Flip illusion campfire skull" loading="lazy" />
-            <figcaption>Flip Illusion, Campfire + Skull</figcaption>
+            <figcaption>Campfire + Skull</figcaption>
+          </figure>
+          <figure>
+            <img src="flip_illusion_campfire_skull.png" alt="Flip illusion campfire skull flipped" style="transform: rotate(180deg);" loading="lazy" />
+            <figcaption>Campfire + Skull (flipped)</figcaption>
           </figure>
           <figure>
             <img src="flip_illusion_old_man_campfire.png" alt="Flip illusion old man campfire" loading="lazy" />
-            <figcaption>Flip Illusion, Old Man + Campfire</figcaption>
+            <figcaption>Old Man + Campfire</figcaption>
+          </figure>
+          <figure>
+            <img src="flip_illusion_old_man_campfire.png" alt="Flip illusion old man campfire flipped" style="transform: rotate(180deg);" loading="lazy" />
+            <figcaption>Old Man + Campfire (flipped)</figcaption>
           </figure>
           <figure>
             <img src="flip_illusion_old_man_village.png" alt="Flip illusion old man village" loading="lazy" />
-            <figcaption>Flip Illusion, Old Man + Village</figcaption>
+            <figcaption>Old Man + Village</figcaption>
+          </figure>
+          <figure>
+            <img src="flip_illusion_old_man_village.png" alt="Flip illusion old man village flipped" style="transform: rotate(180deg);" loading="lazy" />
+            <figcaption>Old Man + Village (flipped)</figcaption>
           </figure>
         </div>
 
