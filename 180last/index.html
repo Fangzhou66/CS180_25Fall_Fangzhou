@@ -9,6 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
   <style>
     :root {
       --fg: #1a1a2e;
@@ -253,6 +255,17 @@
     .gallery-small { justify-items: center; }
     .gallery-small figure { max-width: 600px; width: 100%; }
     ul { margin: 16px 0; padding-left: 24px; color: var(--muted); }
+    .formula {
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      margin: 20px 0;
+      overflow-x: auto;
+      text-align: center;
+    }
+    .formula p { margin: 0; max-width: none; }
     footer {
       border-top: 1px solid var(--border);
       padding: 36px 24px 48px;
@@ -339,12 +352,19 @@
 
       <!-- Part 1.1 and 1.2 -->
       <section id="part1">
-        <h2>Part 1.1 and Part 1.2: Forward Pass and Classical Denoising</h2>
-        <p>Part 1.1 implements the forward pass by adding noise according to the noise schedule. Part 1.2 implements the classical denoising by simply passing the noisy images through a gaussian filter. The comparison and the results from part 1.1 are shown below. Images are taken at time steps 250, 500, 750.</p>
+        <h2>Part 1.1: Implementing the Forward Process</h2>
+        <p>The forward process adds noise to a clean image according to the diffusion noise schedule. Given a clean image \(x_0\), we can obtain the noisy image \(x_t\) at timestep \(t\) using the following formula:</p>
+        <div class="formula">
+          <p>\[ x_t = \sqrt{\bar{\alpha}_t} x_0 + \sqrt{1 - \bar{\alpha}_t} \epsilon, \quad \text{where } \epsilon \sim \mathcal{N}(0, I) \]</p>
+        </div>
+        <p>Here, \(\bar{\alpha}_t\) is the cumulative product of the noise schedule, controlling how much of the original signal remains at each timestep. As \(t\) increases, more noise is added and the image becomes increasingly corrupted.</p>
+
+        <h2>Part 1.2: Classical Denoising</h2>
+        <p>A naive approach to denoising is to apply a Gaussian blur filter to the noisy images. While this removes some high-frequency noise, it also blurs the underlying image structure, resulting in poor reconstruction quality. The comparison below shows the noisy images at timesteps 250, 500, and 750, along with their Gaussian-filtered versions.</p>
         <div class="gallery gallery-wide">
           <figure class="wide">
             <img src="classical_denoised.png" alt="Forward Pass and Classical Denoising Comparison" loading="lazy" />
-            <figcaption>Forward Pass Comparison and Gaussian Denoising</figcaption>
+            <figcaption>Forward Pass Results (top) and Classical Gaussian Denoising (bottom) at t = 250, 500, 750</figcaption>
           </figure>
         </div>
       </section>
@@ -352,7 +372,11 @@
       <!-- Part 1.3 -->
       <section id="part13">
         <h2>Part 1.3: One-Step Denoising</h2>
-        <p>This part implements the one-step denoising by passing the noisy images through a trained denoising model. The denoising model is a simple MLP that takes in the noisy images and outputs the denoised images. We separately denoise the images at time steps 250, 500, 750.</p>
+        <p>Instead of using Gaussian blur, we can use a pretrained UNet denoiser to estimate the noise and recover the clean image. Given the noisy image \(x_t\) and the predicted noise \(\hat{\epsilon}\), we can estimate the original image using:</p>
+        <div class="formula">
+          <p>\[ \hat{x}_0 = \frac{x_t - \sqrt{1 - \bar{\alpha}_t} \hat{\epsilon}}{\sqrt{\bar{\alpha}_t}} \]</p>
+        </div>
+        <p>However, one-step denoising has limitations: the quality degrades significantly at higher noise levels because the UNet must make larger predictions. Below are the results at timesteps 250, 500, and 750.</p>
         <h3>t = 250:</h3>
         <div class="gallery gallery-small">
           <figure>
@@ -379,7 +403,11 @@
       <!-- Part 1.4 -->
       <section id="part14">
         <h2>Part 1.4: Iterative Denoising</h2>
-        <p>While the quality of the one-step denoising is not very good, we can improve it by iterating the denoising process. The iterative denoising process is implemented by passing the noisy images through the denoising model multiple times. We show the noisy Campanile image during the iterative denoising process.</p>
+        <p>To achieve better results, we can iteratively denoise by taking smaller steps. Starting from a noisy image, we progressively remove noise using the following update rule:</p>
+        <div class="formula">
+          <p>\[ x_{t'} = \frac{\sqrt{\bar{\alpha}_{t'}}\beta_t}{1 - \bar{\alpha}_t} x_0 + \frac{\sqrt{\alpha_t}(1 - \bar{\alpha}_{t'})}{1 - \bar{\alpha}_t} x_t + v_\sigma \]</p>
+        </div>
+        <p>where \(v_\sigma\) is random noise scaled appropriately. We use strided timesteps starting from 990 with stride 30, iteratively denoising until we reach timestep 0. This produces much cleaner results than one-step denoising.</p>
         <div class="gallery gallery-small">
           <figure>
             <img src="iterative_denoised_process.png" alt="Iterative Denoising Process" loading="lazy" />
@@ -398,28 +426,32 @@
       <!-- Part 1.5 and 1.6 -->
       <section id="part15">
         <h2>Part 1.5: Diffusion Model Sampling</h2>
-        <p>Here are five sampled images from the diffusion model with the prompt "a high quality photo."</p>
+        <p>We can generate images from scratch by starting from pure noise and iteratively denoising. Using the prompt "a high quality photo", we generate 5 sample images. The quality is reasonable but not optimal because we're using unconditional generation.</p>
         <div class="gallery gallery-small">
           <figure>
             <img src="samples.png" alt="Diffusion Model Sampling" loading="lazy" />
-            <figcaption>Diffusion Model Sampling</figcaption>
+            <figcaption>Five samples generated from pure noise with prompt "a high quality photo"</figcaption>
           </figure>
         </div>
 
-        <h2>Part 1.6: Classifier-Free Guidance</h2>
-        <p>This part implements the classifier-free guidance by estimating the noise with conditional and unconditional predictions, then combining them with a guidance scale.</p>
+        <h2>Part 1.6: Classifier-Free Guidance (CFG)</h2>
+        <p>To improve generation quality, we use Classifier-Free Guidance which combines conditional and unconditional noise predictions:</p>
+        <div class="formula">
+          <p>\[ \epsilon = \epsilon_u + \gamma (\epsilon_c - \epsilon_u) \]</p>
+        </div>
+        <p>where \(\epsilon_u\) is the unconditional noise estimate, \(\epsilon_c\) is the conditional estimate, and \(\gamma\) is the guidance scale (we use \(\gamma = 7\)). Higher \(\gamma\) values produce images more aligned with the prompt but may reduce diversity.</p>
         <div class="gallery gallery-small">
           <figure>
             <img src="samples_iterative_denoise_cfg.png" alt="Classifier-Free Guidance" loading="lazy" />
-            <figcaption>Classifier-Free Guidance Sampling</figcaption>
+            <figcaption>CFG sampling with \(\gamma = 7\) - significantly improved quality</figcaption>
           </figure>
         </div>
       </section>
 
       <!-- Part 1.7 -->
       <section id="part17">
-        <h2>Part 1.7.1: Image-to-Image Translation</h2>
-        <p>The following images are results from the image-to-image translation. It includes the Campanile image, a web image, and two hand-drawn images.</p>
+        <h2>Part 1.7.1: Image-to-Image Translation (SDEdit)</h2>
+        <p>SDEdit allows us to edit images by adding noise and then denoising with a text prompt. The parameter <code>i_start</code> controls how much noise is added: lower values preserve more of the original image structure, while higher values allow more creative freedom. We apply this technique to the Campanile, a web image, and two hand-drawn sketches.</p>
 
         <h3>Campanile Image</h3>
         <div class="gallery-row">
@@ -466,7 +498,11 @@
         </div>
 
         <h2>Part 1.7.2: Inpainting</h2>
-        <p>This section implements the inpainting technique. In every denoising step, we denoise the whole image. However, only the area with a mask value of 1 is kept. Other areas are reobtained in the next step from redoing the forward pass on the original image. This achieves the effect of only diffusing the masked area with the context unchanged.</p>
+        <p>Inpainting fills in masked regions of an image while keeping the rest unchanged. At each denoising step, we replace the unmasked region with a noisy version of the original:</p>
+        <div class="formula">
+          <p>\[ x_t \leftarrow \mathbf{m} \odot x_t + (1 - \mathbf{m}) \odot \text{forward}(x_{\text{orig}}, t) \]</p>
+        </div>
+        <p>where \(\mathbf{m}\) is the binary mask (1 = region to inpaint, 0 = keep original). This allows the diffusion model to generate new content only in the masked area while maintaining consistency with the surrounding context.</p>
 
         <h3>Campanile Inpainting</h3>
         <div class="gallery-row-4">
@@ -493,7 +529,7 @@
         </div>
 
         <h2>Part 1.7.3: Text-Conditional Image-to-image Translation</h2>
-        <p>This section is very similar to the image-to-image translation task. The only difference is that in this task, we use a custom textual prompt instead of a general prompt.</p>
+        <p>This extends SDEdit by using specific text prompts to guide the translation. Instead of the generic "a high quality photo" prompt, we provide descriptive prompts that transform the image toward a target concept while preserving the underlying structure. The process is the same as Part 1.7.1, but with targeted prompts that steer the generation in a specific semantic direction.</p>
 
         <h3>Campanile with Text Prompt</h3>
         <div class="gallery-row">
@@ -532,7 +568,13 @@
       <!-- Part 1.8 and 1.9 -->
       <section id="part18">
         <h2>Part 1.8: Visual Anagrams</h2>
-        <p>This section implements the visual anagrams. In every denoising step, we predict the normal noise and we also predict the noise flipped based on the flipped prompt. We then simply flip the flipped noise back and add them together to get our final predicted noise.</p>
+        <p>Visual anagrams are images that look like different things when flipped upside down. To create these, we simultaneously denoise toward two different prompts - one for the upright view and one for the flipped view. At each denoising step:</p>
+        <div class="formula">
+          <p>\[ \epsilon_1 = \text{UNet}(x_t, t, p_1) \]</p>
+          <p>\[ \epsilon_2 = \text{flip}(\text{UNet}(\text{flip}(x_t), t, p_2)) \]</p>
+          <p>\[ \epsilon = \frac{\epsilon_1 + \epsilon_2}{2} \]</p>
+        </div>
+        <p>where \(p_1\) is the prompt for the upright image and \(p_2\) is the prompt for the flipped image. By averaging these noise estimates, the resulting image satisfies both prompts depending on its orientation.</p>
         <div class="gallery-row-6">
           <figure>
             <img src="flip_illusion_campfire_skull.png" alt="Flip illusion campfire skull" loading="lazy" />
@@ -561,7 +603,11 @@
         </div>
 
         <h2>Part 1.9: Hybrid Images</h2>
-        <p>This section implements hybrid images. This is done by predicting noises both in the low frequency and the high frequency domains. We then add them together to get our final noise.</p>
+        <p>Hybrid images appear as different things when viewed from different distances. This exploits the fact that humans perceive low frequencies at a distance and high frequencies up close. We create these by combining the low-frequency component of one noise estimate with the high-frequency component of another:</p>
+        <div class="formula">
+          <p>\[ \epsilon = f_{\text{lowpass}}(\epsilon_1) + f_{\text{highpass}}(\epsilon_2) \]</p>
+        </div>
+        <p>where \(\epsilon_1\) is the noise estimate for the low-frequency (distant view) prompt and \(\epsilon_2\) is for the high-frequency (close-up view) prompt. The lowpass and highpass filters are complementary Gaussian filters.</p>
         <div class="gallery">
           <figure>
             <img src="hybrid_campfire_skull.png" alt="Hybrid campfire skull" loading="lazy" />
@@ -629,7 +675,11 @@
       <!-- Part B.2 -->
       <section id="partb2">
         <h2>Part B.2: Training a Flow Matching Model</h2>
-        <p>The one-step denoiser doesn't work well. Therefore, we want to train a denoiser that iteratively denoise the pure noises. We choose to implement the flow matching model in the following sections. We will start with time and class conditioned UNet implementations.</p>
+        <p>The one-step denoiser doesn't work well. Therefore, we want to train a denoiser that iteratively denoise the pure noises. We choose to implement the flow matching model, which learns to predict the velocity field that transforms noise into data:</p>
+        <div class="formula">
+          <p>\[ x_t = (1 - t) x_0 + t \epsilon, \quad v_t = \epsilon - x_0 \]</p>
+        </div>
+        <p>where \(x_0\) is the clean image, \(\epsilon\) is noise, and \(v_t\) is the velocity we train the model to predict. During sampling, we integrate this velocity field to transform pure noise into clean images.</p>
 
         <h2>Part B.2.1 and Part B.2.2: Adding Time Conditioning to UNet and Training the UNet</h2>
         <p>We implement the fully connected block and pass the conditioned time variable before the concatenations. The training loss curve is presented below.</p>
