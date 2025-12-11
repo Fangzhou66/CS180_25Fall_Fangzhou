@@ -146,72 +146,6 @@
     /* ===== Main ===== */
     main { padding: 50px 0 80px; }
 
-    /* ===== Sticky Side Navigation Layout ===== */
-    .layout {
-      display: grid;
-      grid-template-columns: 260px minmax(0, 1fr);
-      gap: 28px;
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 0 24px;
-      align-items: start;
-    }
-    .layout main .container {
-      max-width: var(--max-width);
-      padding: 0;
-    }
-    .side-nav {
-      position: sticky;
-      top: 24px;
-      align-self: start;
-      max-height: calc(100vh - 48px);
-      overflow-y: auto;
-      padding: 18px 16px;
-      background: rgba(255,255,255,0.92);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      box-shadow: var(--shadow-sm);
-      backdrop-filter: blur(8px);
-    }
-    .side-nav__title {
-      font-weight: 700;
-      font-size: 12px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 10px;
-    }
-    .side-toc {
-      display: grid;
-      gap: 6px;
-    }
-    .side-toc a {
-      display: block;
-      padding: 8px 10px;
-      border-radius: 10px;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--fg-light);
-      border: 1px solid transparent;
-      transition: var(--transition);
-      line-height: 1.4;
-    }
-    .side-toc a span {
-      color: var(--accent);
-      font-weight: 700;
-      font-size: 11px;
-    }
-    .side-toc a:hover {
-      background: var(--panel);
-      color: var(--fg);
-    }
-    .side-toc a.active {
-      background: var(--accent-bg);
-      color: var(--fg);
-      border-color: #dbeafe;
-      box-shadow: var(--shadow-xs);
-    }
-
     /* ===== Section Cards ===== */
     section {
       background: var(--card-bg);
@@ -397,11 +331,6 @@
     }
 
     /* ===== Responsive ===== */
-    @media (max-width: 1100px) {
-      .layout { grid-template-columns: 1fr; }
-      .side-nav { position: relative; top: 0; max-height: none; }
-      .layout main { padding-top: 24px; }
-    }
     @media (max-width: 900px) {
       .gallery-row { grid-template-columns: repeat(4, 1fr); }
       .gallery-row-4 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
@@ -422,42 +351,6 @@
       .toc a { padding: 8px 12px; font-size: 11px; }
       .formula { padding: 20px 16px; }
       .formula::before { display: none; }
-    }
-
-    /* ===== Print Layout ===== */
-    @media print {
-      body {
-        background: #ffffff !important;
-        color: #000000 !important;
-        font-size: 12pt;
-        line-height: 1.55;
-      }
-      header {
-        background: none !important;
-        padding: 24px 0 18px;
-        color: #000000;
-      }
-      header::before,
-      header::after { display: none !important; }
-      .layout {
-        display: block !important;
-        max-width: none !important;
-        padding: 0 !important;
-      }
-      .side-nav,
-      .back-top { display: none !important; }
-      main { padding: 0 !important; }
-      main .container { max-width: none !important; }
-      section {
-        box-shadow: none !important;
-        border: 1px solid #d0d0d0 !important;
-        page-break-inside: avoid;
-      }
-      figure {
-        box-shadow: none !important;
-        border: 1px solid #e0e0e0 !important;
-      }
-      a { color: #000000 !important; text-decoration: underline; }
     }
 
     /* ===== Back to Top Button ===== */
@@ -522,16 +415,10 @@
         <a href="#partb2"><span>Part B.2</span> Flow matching model</a>
       </nav>
     </div>
-  </header>
+	  </header>
 
-  <div class="layout">
-    <aside class="side-nav" aria-label="Table of contents">
-      <div class="side-nav__title">Contents</div>
-      <nav class="side-toc"></nav>
-    </aside>
-
-    <main>
-      <div class="container">
+  <main>
+    <div class="container">
       <!-- Part 0 -->
       <section id="part0">
         <h2>Part 0: Setup and Playing with My Own Text Prompt</h2>
@@ -972,38 +859,12 @@
           </figure>
         </div>
       </section>
-      </div>
-    </main>
-  </div>
+    </div>
+  </main>
 
   <button class="back-top" type="button" aria-label="Back to top">Top</button>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const headerToc = document.querySelector('.toc');
-      const sideToc = document.querySelector('.side-toc');
-      if (headerToc && sideToc) {
-        sideToc.innerHTML = headerToc.innerHTML;
-      }
-
-      const sections = Array.from(document.querySelectorAll('main section[id]'));
-      const sideLinks = Array.from(document.querySelectorAll('.side-toc a'));
-      if ('IntersectionObserver' in window && sections.length && sideLinks.length) {
-        const observer = new IntersectionObserver(
-          entries => {
-            const activeEntry = entries
-              .filter(entry => entry.isIntersecting)
-              .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-            if (!activeEntry) return;
-            const activeId = activeEntry.target.id;
-            sideLinks.forEach(link => {
-              link.classList.toggle('active', link.getAttribute('href') === `#${activeId}`);
-            });
-          },
-          { rootMargin: '-35% 0px -55% 0px', threshold: [0, 0.25, 0.6] }
-        );
-        sections.forEach(section => observer.observe(section));
-      }
-
       const backTop = document.querySelector('.back-top');
       if (backTop) {
         const toggle = () => backTop.classList.toggle('show', window.scrollY > 600);
